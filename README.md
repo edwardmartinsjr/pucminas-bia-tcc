@@ -2,7 +2,7 @@
 Puc Minas BIA TCC - ETL running on top of Apache Airflow
 
 ## Master Status:
-[![CircleCI](https://circleci.com/gh/edwardmartinsjr/pucminas-bia-tcc/tree/main.svg?style=shield&circle-token=e9143247452147868012fde0b0665ca76e89c610)](https://circleci.com/gh/edwardmartinsjr/pucminas-bia-tcc/tree/main)
+[![CircleCI](https://circleci.com/gh/edwardmartinsjr/pucminas-bia-tcc/tree/main.svg?style=shield&circle-token=f186ba11e963ce943269eb2e03f22c2ffce56262)](https://circleci.com/gh/edwardmartinsjr/pucminas-bia-tcc/tree/main)
 
 ## Architecture:
 ![](architecture.png?raw=true)
