@@ -1,0 +1,65 @@
+version: 2.1
+
+orbs:
+  python: circleci/python@0.2.1
+
+
+jobs:
+  build-and-test:
+    docker:
+      - image: circleci/python:3.6.4
+      - image: circleci/mysql:5.7
+        environment:
+          MYSQL_ROOT_PASSWORD: mysql
+          MYSQL_DATABASE: olist_db
+          MYSQL_USER: root
+          MYSQL_PASSWORD: mysql
+    executor: python/default
+    steps:
+      - checkout
+      - run:
+        # Our primary container isn't MYSQL so run a sleep command until it's ready.
+          name: Waiting for MySQL to be ready
+          command: |
+            for i in `seq 1 10`;
+            do
+              nc -z ${MYSQL_HOST} ${MYSQL_PORT} && echo Success && exit 0
+              echo -n .
+              sleep 1
+            done
+            echo Failed waiting for MySQL && exit 1      
+      - run:
+          name: Install MySQL CLI; Import data;
+          command: |
+            sudo apt-get update
+            sudo apt-get install mysql-client
+            mysql -h ${MYSQL_HOST} -u ${MYSQL_USER} -p${MYSQL_PASSWORD} ${MYSQL_NAME} < sql-data/migration.sql
+      # Prepare the environement
+      - python/load-cache
+      - python/install-deps
+      - python/save-cache
+      - run:
+          name: Install mysql client for Airflow
+          command: sudo pip install mysqlclient==2.0.1
+      - run:
+          name: Install apache airflow
+          command: sudo pip install apache-airflow==1.10.12
+      - run:
+          name: Install xlrd
+          command: sudo pip install xlrd==1.2.0       
+      - run:
+          name: Install pyxlsb
+          command: sudo pip install pyxlsb==1.0.6
+      - run:
+          name: Install xlsxwriter
+          command: sudo pip install xlsxwriter==1.3.1         
+      # Run tests
+      - run:
+          name: Test storage module
+          command: python ./airflow-dag/helpers/storage_test.py -v
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build-and-test
