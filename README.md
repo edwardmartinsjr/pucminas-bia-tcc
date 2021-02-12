@@ -40,7 +40,7 @@ Docking Apache Airflow:
 Running at Apache Airflow:
 - Add DAG `airflow-dag/` to DAGs folder `/usr/local/airflow/dags/` 
 
-![](architecture.png?raw=true)
+![](docker.png?raw=true)
 
 ## Running tests:
 - `python ./airflow-dag/storage_test.py -v`
