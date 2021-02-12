@@ -11,13 +11,36 @@ Puc Minas BIA TCC - ETL running on top of Apache Airflow
 Install application dependencies:
 - `pip install -r requirements.txt`
 
+MySQL:
+- `docker pull mysql/mysql-server:8.0`
+- `docker run --name=mysql1 -p 3306:3306 --restart on-failure -d mysql/mysql-server:8.0`
+- `docker logs mysql1`
+- `docker exec -it mysql1 mysql -uroot -p`
+- `ALTER USER 'root'@'localhost' IDENTIFIED BY 'mysql';`
+- `CREATE USER 'sa'@'localhost' IDENTIFIED BY 'sa';`
+- `CREATE USER 'sa'@'%' IDENTIFIED BY 'sa';`
+- `GRANT ALL ON *.* TO 'sa'@'localhost';`
+- `GRANT ALL ON *.* TO 'sa'@'%';`
+- `flush privileges;`
+- `SELECT host, user FROM mysql.user;`
+
 ## Run:
 Docking Apache Airflow:
 - `docker build -t airflow-1_10_12_basic . `
-- `docker run --name pucminas_bia_tcc_machine -d --mount src="C:\Users\Edward\Projects\dataset",target=/usr/local/airflow/files,type=bind --env MYSQL_USER=root --env MYSQL_PASSWORD=mysql --env MYSQL_HOST=127.0.0.1 --env MYSQL_PORT=3306 --env MYSQL_NAME=olist_db -p 80:8080 airflow-1_10_12_basic`
+- `docker run --name pucminas_bia_tcc_machine -d --mount src="C:\Users\Edward\Projects\dataset",target=/usr/local/airflow/files,type=bind --env MYSQL_USER=sa --env MYSQL_PASSWORD=sa --env MYSQL_HOST=127.0.0.1 --env MYSQL_PORT=3306 --env MYSQL_NAME=olist_db -p 80:8080 airflow-1_10_12_basic`
+- `docker exec -it pucminas_bia_tcc_machine /bin/bash`
+- `vi airflow.cfg`
+- `load_examples = False`
+- `exit`
+- `docker stop pucminas_bia_tcc_machine`
+- `docker start pucminas_bia_tcc_machine`
+- `docker exec -it pucminas_bia_tcc_machine /bin/bash`
+- `airflow resetdb`
 
 Running at Apache Airflow:
 - Add DAG `airflow-dag/` to DAGs folder `/usr/local/airflow/dags/` 
+
+![](architecture.png?raw=true)
 
 ## Running tests:
 - `python ./airflow-dag/storage_test.py -v`
