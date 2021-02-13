@@ -37,9 +37,11 @@ Docking Apache Airflow:
 - `docker start pucminas_bia_tcc_machine`
 - `docker exec -it pucminas_bia_tcc_machine /bin/bash`
 - `airflow resetdb`
+- `pip install --user mysqlclient`
 
 Running at Apache Airflow:
 - Add DAG `airflow-dag/` to DAGs folder `/usr/local/airflow/dags/` 
+- `docker cp airflow-dag/. pucminas_bia_tcc_machine:/usr/local/airflow/dags`
 
 ![](docker.png?raw=true)
 
