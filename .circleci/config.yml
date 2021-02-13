@@ -56,6 +56,9 @@ jobs:
       - run:
           name: Test storage module
           command: python ./airflow-dag/helpers/storage_test.py -v
+      - run:
+          name: Test product_category_name_translation module
+          command: python ./airflow-dag/product_category_name_translation_test.py -v          
 
 workflows:
   version: 2

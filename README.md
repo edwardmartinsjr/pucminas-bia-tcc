@@ -23,6 +23,7 @@ MySQL:
 - `GRANT ALL ON *.* TO 'sa'@'%';`
 - `flush privileges;`
 - `SELECT host, user FROM mysql.user;`
+- `set global local_infile=true;`
 
 ## Run:
 Docking Apache Airflow:
