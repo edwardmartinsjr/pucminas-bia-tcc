@@ -4,7 +4,7 @@ CREATE DATABASE `olist_db` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb
 CREATE TABLE `olist_db`.`product_category_name_translation` (
   `product_category_name` text,
   `product_category_name_english` text
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `olist_db`.`olist_geolocation_dataset` (
   `geolocation_zip_code_prefix` text,
@@ -12,7 +12,7 @@ CREATE TABLE `olist_db`.`olist_geolocation_dataset` (
   `geolocation_lng` double DEFAULT NULL,
   `geolocation_city` text,
   `geolocation_state` text
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `olist_db`.`olist_products_dataset` (
   `product_id` VARCHAR(50),
@@ -25,7 +25,7 @@ CREATE TABLE `olist_db`.`olist_products_dataset` (
   `product_height_cm` bigint DEFAULT NULL,
   `product_width_cm` bigint DEFAULT NULL,
   PRIMARY KEY (product_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `olist_db`.`olist_sellers_dataset` (
   `seller_id` VARCHAR(50),
@@ -33,7 +33,7 @@ CREATE TABLE `olist_db`.`olist_sellers_dataset` (
   `seller_city` text,
   `seller_state` text,
   PRIMARY KEY (seller_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `olist_db`.`olist_customers_dataset` (
   `customer_id` VARCHAR(50),
@@ -42,7 +42,7 @@ CREATE TABLE `olist_db`.`olist_customers_dataset` (
   `customer_city` text,
   `customer_state` text,
   PRIMARY KEY (customer_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `olist_db`.`olist_orders_dataset` (
   `order_id` VARCHAR(50),
@@ -57,7 +57,7 @@ CREATE TABLE `olist_db`.`olist_orders_dataset` (
   FOREIGN KEY (customer_id)
         REFERENCES olist_db.olist_customers_dataset(customer_id)
         ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `olist_db`.`olist_order_items_dataset` (
   `order_id` VARCHAR(50),
@@ -74,7 +74,7 @@ CREATE TABLE `olist_db`.`olist_order_items_dataset` (
   FOREIGN KEY (product_id)
         REFERENCES olist_db.olist_products_dataset(product_id)
         ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `olist_db`.`olist_order_payments_dataset` (
   `order_id` VARCHAR(50),
@@ -85,7 +85,7 @@ CREATE TABLE `olist_db`.`olist_order_payments_dataset` (
   FOREIGN KEY (order_id)
         REFERENCES olist_db.olist_orders_dataset(order_id)
         ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `olist_db`.`olist_order_reviews_dataset` (
   `review_id` VARCHAR(50),
@@ -99,7 +99,7 @@ CREATE TABLE `olist_db`.`olist_order_reviews_dataset` (
   FOREIGN KEY (order_id)
         REFERENCES olist_db.olist_orders_dataset(order_id)
         ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 
