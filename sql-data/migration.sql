@@ -1,5 +1,5 @@
 DROP DATABASE IF EXISTS `olist_db`;
-CREATE DATABASE `olist_db` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+CREATE DATABASE `olist_db`;
 
 CREATE TABLE `olist_db`.`product_category_name_translation` (
   `product_category_name` text,
