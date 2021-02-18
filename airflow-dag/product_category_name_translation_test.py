@@ -8,7 +8,7 @@ import product_category_name_translation as task
 
 # START TESTS:
 class Test(unittest.TestCase):
-    db_name = 'temp_olist_db'
+    db_name = os.getenv('MYSQL_DB')
     table_name = 'product_category_name_translation'
     file_full_path = './airflow-dag/dummy_files/'+table_name+'.csv'
 
