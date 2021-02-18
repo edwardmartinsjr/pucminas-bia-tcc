@@ -11,7 +11,7 @@ from datetime import timedelta
 
 from helpers import storage
 
-db_name = 'olist_db'
+db_name = os.getenv('MYSQL_DB')
 table_name = 'product_category_name_translation'
 file_full_path = '/usr/local/airflow/files/'+table_name+'.csv'
 
