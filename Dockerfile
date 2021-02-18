@@ -60,6 +60,7 @@ RUN pip install --upgrade pip && \
     pip install pyxlsb \
     pip install xlrd \
     pip install xlsxwriter \
+    pip install mysqlclient \
     pip install -Iv apache-airflow==${AIRFLOW_VERSION} --constraint /requirements-for-apache-airflow.txt
 
 # Copy the entrypoint.sh from host to container (at path AIRFLOW_HOME)
