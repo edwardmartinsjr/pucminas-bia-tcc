@@ -12,7 +12,7 @@ from datetime import timedelta
 from helpers import storage
 
 db_name = os.getenv('MYSQL_NAME')
-table_name = 'product_category_name_translation'
+table_name = 'olist_geolocation_dataset'
 file_full_path = '/usr/local/airflow/files/'+table_name+'.csv'
 
 @provide_session
@@ -47,10 +47,14 @@ def load_data_func(file_path, db_table_name):
             LOAD DATA LOCAL INFILE :file_path
             INTO TABLE {db_table_name}
             FIELDS TERMINATED BY ','
+            OPTIONALLY ENCLOSED BY '"'
             LINES TERMINATED BY '\n'
-            IGNORE 1 LINES(
-                `product_category_name` , 
-                `product_category_name_english`);            
+            IGNORE 1 LINES( 
+                `geolocation_zip_code_prefix`,
+                `geolocation_lat`,
+                `geolocation_lng`,
+                `geolocation_city`,
+                `geolocation_state`);            
         """.format(db_table_name = db_table_name))
 
         connection=storage.engine_connect()
