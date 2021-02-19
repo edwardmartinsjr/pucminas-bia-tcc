@@ -36,10 +36,16 @@ def get_session():
     return Session()
 
 def truncate_db(table):
-    # Delete all table data
+    # Truncate all table data
     # Engine-level in transactional context
     with engine_connect().begin() as conn:
         conn.execute('TRUNCATE TABLE ' + table + ';')
+
+def delete_db(table):
+    # Delete all table data
+    # Engine-level in transactional context
+    with engine_connect().begin() as conn:
+        conn.execute('DELETE FROM ' + table + ';')
 
 # Open excel file
 def open_file(path_to_open):
