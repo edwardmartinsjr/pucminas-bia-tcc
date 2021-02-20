@@ -12,7 +12,7 @@ db_name = os.getenv('MYSQL_NAME')
 
 # Get connection
 def get_conn():
-    return 'mysql://%s:%s@%s:%s/%s?charset=utf8&local_infile=1' % (db_user, db_password, db_host, db_port, db_name)
+    return 'mysql://%s:%s@%s:%s/%s?charset=utf8mb4&local_infile=1' % (db_user, db_password, db_host, db_port, db_name)
     
 # Set MySQL engine connection
 def engine_connect():
