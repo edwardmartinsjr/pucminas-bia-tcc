@@ -6,7 +6,7 @@ from airflow.models import XCom
 
 import os
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.sql import text
+import pandas as pd
 from datetime import timedelta
 
 from helpers import storage
@@ -30,7 +30,7 @@ def load_data(ds, **kwargs):
 # Truncate DB
 def clear_db_func(db_table_name):
     try:
-        print('Delete DB: {db_table_name}'.format(db_table_name = db_table_name))
+        print('Truncate DB: {db_table_name}'.format(db_table_name = db_table_name))
         storage.truncate_db(db_table_name)
         return True
     except BaseException as e:
@@ -43,23 +43,16 @@ def load_data_func(file_path, db_table_name):
     print('DB table name: {db_table_name}'.format(db_table_name = db_table_name))
 
     try:
-        statement = text("""
-            LOAD DATA LOCAL INFILE :file_path
-            INTO TABLE {db_table_name}
-            FIELDS TERMINATED BY ','
-            OPTIONALLY ENCLOSED BY '"'
-            LINES TERMINATED BY '\n'
-            IGNORE 1 LINES( 
-                `geolocation_zip_code_prefix`,
-                `geolocation_lat`,
-                `geolocation_lng`,
-                `geolocation_city`,
-                `geolocation_state`);            
-        """.format(db_table_name = db_table_name))
+        df = pd.read_csv(file_path)
+
+        # Removes duplicate rows based on all columns.
+        df = df.drop_duplicates()     
+          
+        df.to_sql(table_name,storage.engine_connect(),index=False,if_exists="append",schema=db_name)
 
         connection=storage.engine_connect()
-        result = connection.execute(statement, file_path=file_path)
-        print('Row count: ' + str(vars(result)['rowcount']))
+        result = connection.execute('SELECT COUNT(*) FROM {db_table_name};'.format(db_table_name= db_table_name))
+        print('Row count: ' + str([{value for value in row} for row in result if result is not None][0]))
         return True
     except SQLAlchemyError as e:
         raise ValueError(str(e.__dict__['orig']))
@@ -76,7 +69,7 @@ with DAG(
     dag_id=table_name,
     default_args=args,
     max_active_runs=1,
-    schedule_interval='00 13 * * 1',
+    schedule_interval='00 12 * * 1',
     catchup=False,
     on_success_callback = on_success,) as dag:
 
