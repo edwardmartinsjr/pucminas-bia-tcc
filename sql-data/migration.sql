@@ -67,7 +67,6 @@ CREATE TABLE `olist_db`.`olist_order_items_dataset` (
   `shipping_limit_date` datetime DEFAULT NULL,
   `price` double DEFAULT NULL,
   `freight_value` double DEFAULT NULL,
-  PRIMARY KEY (order_item_id),
   FOREIGN KEY (order_id)
         REFERENCES olist_db.olist_orders_dataset(order_id)
         ON DELETE CASCADE,

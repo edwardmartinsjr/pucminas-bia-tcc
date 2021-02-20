@@ -1,3 +1,4 @@
+cls
 python ./airflow-dag/product_category_name_translation_test.py -v
 python ./airflow-dag/olist_geolocation_dataset_test.py -v
 python ./airflow-dag/olist_products_dataset_test.py -v

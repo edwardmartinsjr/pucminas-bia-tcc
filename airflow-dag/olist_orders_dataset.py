@@ -6,7 +6,7 @@ from airflow.models import XCom
 
 import os
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.sql import text
+import pandas as pd
 from datetime import timedelta
 
 from helpers import storage
@@ -43,26 +43,12 @@ def load_data_func(file_path, db_table_name):
     print('DB table name: {db_table_name}'.format(db_table_name = db_table_name))
 
     try:
-        statement = text("""
-            LOAD DATA LOCAL INFILE :file_path
-            INTO TABLE {db_table_name}
-            FIELDS TERMINATED BY ','
-            OPTIONALLY ENCLOSED BY '"'
-            LINES TERMINATED BY '\n'
-            IGNORE 1 LINES(
-                `order_id`,
-                `customer_id`,
-                `order_status`,
-                `order_purchase_timestamp`,
-                `order_approved_at`,
-                `order_delivered_carrier_date`,
-                `order_delivered_customer_date`,
-                `order_estimated_delivery_date`);            
-        """.format(db_table_name = db_table_name))
+        df = pd.read_csv(file_path)
+        df.to_sql(table_name,storage.engine_connect(),index=False,if_exists="append",schema=db_name)
 
         connection=storage.engine_connect()
-        result = connection.execute(statement, file_path=file_path)
-        print('Row count: ' + str(vars(result)['rowcount']))
+        result = connection.execute('SELECT COUNT(*) FROM {db_table_name};'.format(db_table_name= db_table_name))
+        print('Row count: ' + str([{value for value in row} for row in result if result is not None][0]))
         return True
     except SQLAlchemyError as e:
         raise ValueError(str(e.__dict__['orig']))
