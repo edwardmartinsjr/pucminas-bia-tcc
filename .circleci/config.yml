@@ -63,8 +63,11 @@ jobs:
           name: Test olist_geolocation_dataset module
           command: python ./airflow-dag/olist_geolocation_dataset_test.py -v
       - run:
-          name: Test olist_geolocation_dataset module
-          command: python ./airflow-dag/olist_products_dataset_test.py -v          
+          name: Test olist_products_dataset_test module
+          command: python ./airflow-dag/olist_products_dataset_test.py -v
+      - run:
+          name: Test olist_sellers_dataset module
+          command: python ./airflow-dag/olist_sellers_dataset_test.py -v                    
 
 workflows:
   version: 2
