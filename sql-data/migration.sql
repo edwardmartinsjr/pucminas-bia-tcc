@@ -73,7 +73,10 @@ CREATE TABLE `olist_db`.`olist_order_items_dataset` (
         ON DELETE CASCADE,
   FOREIGN KEY (product_id)
         REFERENCES olist_db.olist_products_dataset(product_id)
-        ON DELETE CASCADE
+        ON DELETE CASCADE,
+  FOREIGN KEY (seller_id)
+        REFERENCES olist_db.olist_sellers_dataset(seller_id)
+        ON DELETE CASCADE        
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `olist_db`.`olist_order_payments_dataset` (
@@ -100,7 +103,3 @@ CREATE TABLE `olist_db`.`olist_order_reviews_dataset` (
         REFERENCES olist_db.olist_orders_dataset(order_id)
         ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-
-
-
