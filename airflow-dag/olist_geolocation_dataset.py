@@ -44,6 +44,10 @@ def load_data_func(file_path, db_table_name):
 
     try:
         df = pd.read_csv(file_path)
+
+        # Removes duplicate rows based on all columns.
+        df = df.drop_duplicates()     
+          
         df.to_sql(table_name,storage.engine_connect(),index=False,if_exists="append",schema=db_name)
 
         connection=storage.engine_connect()
