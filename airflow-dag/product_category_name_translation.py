@@ -30,7 +30,7 @@ def load_data(ds, **kwargs):
 # Truncate DB
 def clear_db_func(db_table_name):
     try:
-        print('Delete DB: {db_table_name}'.format(db_table_name = db_table_name))
+        print('Truncate DB: {db_table_name}'.format(db_table_name = db_table_name))
         storage.truncate_db(db_table_name)
         return True
     except BaseException as e:

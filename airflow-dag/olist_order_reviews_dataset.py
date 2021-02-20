@@ -27,15 +27,14 @@ def clear_db(ds, **kwargs):
 def load_data(ds, **kwargs):
     load_data_func(file_full_path, db_name+'.'+table_name)
 
-# Delete DB
+# Truncate DB
 def clear_db_func(db_table_name):
     try:
-        print('Delete DB: {db_table_name}'.format(db_table_name = db_table_name))
-        storage.delete_db(db_table_name)
+        print('Truncate DB: {db_table_name}'.format(db_table_name = db_table_name))
+        storage.truncate_db(db_table_name)
         return True
     except BaseException as e:
-        raise ValueError(e)       
-
+        raise ValueError(e)   
 # Save data into DB
 def load_data_func(file_path, db_table_name):
 
