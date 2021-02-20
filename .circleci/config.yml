@@ -79,7 +79,10 @@ jobs:
           command: python ./airflow-dag/olist_order_items_dataset_test.py -v
       - run:
           name: Test olist_order_payments_dataset module
-          command: python ./airflow-dag/olist_order_payments_dataset_test.py -v          
+          command: python ./airflow-dag/olist_order_payments_dataset_test.py -v
+      - run:
+          name: Test olist_order_reviews_dataset module
+          command: python ./airflow-dag/olist_order_reviews_dataset_test.py -v                    
 
 workflows:
   version: 2
