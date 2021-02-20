@@ -1,3 +1,4 @@
 "order_id","payment_sequential","payment_type","payment_installments","payment_value"
 "00e7ee1b050b8499577073aeb2a297a1",1,credit_card,2,146.87
 "29150127e6685892b6eab3eec79f59c7",1,credit_card,8,335.48
+"29150127e6685892b6eab3eec79f59c7",1,credit_card,8,335.48
