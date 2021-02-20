@@ -7,6 +7,9 @@ Puc Minas BIA TCC - ETL running on top of Apache Airflow
 ## Architecture:
 ![](architecture.png?raw=true)
 
+## Olist DB Diagram:
+![](olist_db.png?raw=true)
+
 ## Configuration:
 Install application dependencies:
 - `pip install -r requirements.txt`
