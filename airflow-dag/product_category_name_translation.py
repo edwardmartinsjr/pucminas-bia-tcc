@@ -27,8 +27,12 @@ def clear_db(ds, **kwargs):
 def extract_data(ds, **kwargs):
     return extract_data_func(file_full_path, db_name+'.'+table_name)
 
-def load_data(ds, **kwargs):
+def transform_data(ds, **kwargs):
     df = kwargs['task_instance'].xcom_pull(task_ids='extract_data')
+    return transform_data_func(df)    
+
+def load_data(ds, **kwargs):
+    df = kwargs['task_instance'].xcom_pull(task_ids='transform_data')
     load_data_func(df)
  
 
@@ -51,13 +55,20 @@ def extract_data_func(file_path, db_table_name):
     try:
         df = pd.read_csv(file_path)
 
-        # Removes duplicate rows based on all columns.
+        return df
+    except BaseException as e:
+        raise ValueError(e)
+
+# Validation, Cleansing, Transformation, Aggregation of data
+def transform_data_func(df):
+    try:
+       # Removes duplicate rows based on all columns.
         df = df.drop_duplicates() 
 
         return df
     except BaseException as e:
         raise ValueError(e)
-
+    
 # Save data into DB
 def load_data_func(df):
     try:
@@ -99,10 +110,16 @@ with DAG(
         python_callable=extract_data,
     )
 
+    transform_data = PythonOperator(
+        task_id='transform_data',
+        provide_context=True,
+        python_callable=transform_data,
+    )
+
     load_data = PythonOperator(
         task_id='load_data',
         provide_context=True,
         python_callable=load_data,
     )    
 
-clear_db >> extract_data >> load_data
+clear_db >> extract_data >> transform_data >> load_data

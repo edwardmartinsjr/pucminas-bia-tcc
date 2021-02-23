@@ -17,6 +17,7 @@ class Test(unittest.TestCase):
 
     def test_extract_data_func(self):
         df = task.extract_data_func(self.file_full_path, self.db_name+'.'+self.table_name)
+        df = task.transform_data_func(df)
         self.assertEqual(len(df.index),10)
         self.assertEqual(task.load_data_func(df),True)        
 
