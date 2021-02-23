@@ -24,8 +24,13 @@ def on_success(context, session=None):
 def clear_db(ds, **kwargs):
     clear_db_func(db_name+'.'+table_name)
 
+def extract_data(ds, **kwargs):
+    return extract_data_func(file_full_path, db_name+'.'+table_name)
+
 def load_data(ds, **kwargs):
-    load_data_func(file_full_path, db_name+'.'+table_name)
+    df = kwargs['task_instance'].xcom_pull(task_ids='extract_data')
+    load_data_func(df)  
+
 
 # Truncate DB
 def clear_db_func(db_table_name):
@@ -34,9 +39,10 @@ def clear_db_func(db_table_name):
         storage.truncate_db(db_table_name)
         return True
     except BaseException as e:
-        raise ValueError(e)   
-# Save data into DB
-def load_data_func(file_path, db_table_name):
+        raise ValueError(e)       
+
+# Extract data from CSV
+def extract_data_func(file_path, db_table_name):
 
     print('File name: {file_path}'.format(file_path = file_path))
     print('DB table name: {db_table_name}'.format(db_table_name = db_table_name))
@@ -45,16 +51,23 @@ def load_data_func(file_path, db_table_name):
         df = pd.read_csv(file_path)
 
         # Remove duplicated primary key
-        df = df.drop_duplicates(subset=['review_id'])     
+        df = df.drop_duplicates(subset=['review_id']) 
 
+        return df
+    except BaseException as e:
+        raise ValueError(e)
+
+# Save data into DB    
+def load_data_func(df):
+    try:
         df.to_sql(table_name,storage.engine_connect(),index=False,if_exists="append",schema=db_name)
 
         connection=storage.engine_connect()
-        result = connection.execute('SELECT COUNT(*) FROM {db_table_name};'.format(db_table_name= db_table_name))
+        result = connection.execute('SELECT COUNT(*) FROM {db_table_name};'.format(db_table_name= db_name+'.'+table_name))
         print('Row count: ' + str([{value for value in row} for row in result if result is not None][0]))
         return True
     except SQLAlchemyError as e:
-        raise ValueError(str(e.__dict__['orig']))
+        raise ValueError(str(e.__dict__['orig']))     
 
 # Set Airflow args
 args = {
@@ -78,10 +91,16 @@ with DAG(
         python_callable=clear_db,
     )
 
+    extract_data = PythonOperator(
+        task_id='extract_data',
+        provide_context=True,
+        python_callable=extract_data,
+    )
+
     load_data = PythonOperator(
         task_id='load_data',
         provide_context=True,
         python_callable=load_data,
-    )
+    )    
 
-clear_db >> load_data
+clear_db >> extract_data >> load_data
