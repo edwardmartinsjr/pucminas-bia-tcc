@@ -35,7 +35,6 @@ def load_data(ds, **kwargs):
     df = kwargs['task_instance'].xcom_pull(task_ids='transform_data')
     storage.load_data_into_db(df, db_name, table_name)  
 
-
 # Delete DB
 def clear_db_func(db_table_name):
     try:
@@ -44,7 +43,6 @@ def clear_db_func(db_table_name):
         return True
     except BaseException as e:
         raise ValueError(e)       
-
 
 # Validation, Cleansing, Transformation, Aggregation of data
 def transform_data_func(df):
@@ -56,8 +54,6 @@ def transform_data_func(df):
     except BaseException as e:
         raise ValueError(e)
     
-   
-
 # Set Airflow args
 args = {
     'owner': 'airflow',
