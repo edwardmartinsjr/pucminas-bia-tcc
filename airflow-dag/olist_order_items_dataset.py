@@ -25,7 +25,8 @@ def clear_db(ds, **kwargs):
     clear_db_func(db_name+'.'+table_name)
 
 def extract_data(ds, **kwargs):
-    return storage.extract_data_from_csv(file_full_path, db_name+'.'+table_name)
+    print('DB table name: {db_table_name}'.format(db_table_name = db_name+'.'+table_name))
+    return storage.extract_data_from_csv(file_full_path)
 
 def transform_data(ds, **kwargs):
     df = kwargs['task_instance'].xcom_pull(task_ids='extract_data')

@@ -82,11 +82,9 @@ def load_data_into_db(df, db_name, table_name):
         raise ValueError(str(e.__dict__['orig']))
 
 # Extract data from CSV
-def extract_data_from_csv(file_path, db_table_name):
+def extract_data_from_csv(file_path):
 
     print('File name: {file_path}'.format(file_path = file_path))
-    print('DB table name: {db_table_name}'.format(db_table_name = db_table_name))
-
     try:
         df = pd.read_csv(file_path)
 
