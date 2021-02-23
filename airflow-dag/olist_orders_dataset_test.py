@@ -15,8 +15,9 @@ class Test(unittest.TestCase):
     def test_clear_db_func(self):
         self.assertEqual(task.clear_db_func(self.db_name+'.'+self.table_name),True)
 
-    def test_extract_data_func(self):
+    def test_etl(self):
         df = task.extract_data_func(self.file_full_path, self.db_name+'.'+self.table_name)
+        self.assertEqual(len(df.index),3)
         df = task.transform_data_func(df)
         self.assertEqual(len(df.index),2)
         self.assertEqual(task.load_data_func(df),True)        
