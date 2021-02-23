@@ -5,6 +5,7 @@ from datetime import datetime
 import os
 
 import olist_sellers_dataset as task
+from helpers import storage
 
 # START TESTS:
 class Test(unittest.TestCase):
@@ -15,7 +16,11 @@ class Test(unittest.TestCase):
     def test_clear_db_func(self):
         self.assertEqual(task.clear_db_func(self.db_name+'.'+self.table_name),True)
 
-    def test_load_data_func(self):
-        self.assertEqual(task.load_data_func(self.file_full_path, self.db_name+'.'+self.table_name),True)        
+    def test_etl(self):
+        df = storage.extract_data_from_csv(self.file_full_path)
+        self.assertEqual(len(df.index),11)
+        df = task.transform_data_func(df)
+        self.assertEqual(len(df.index),10)
+        self.assertEqual(storage.load_data_into_db(df, self.db_name, self.table_name),True)        
 
 unittest.main()

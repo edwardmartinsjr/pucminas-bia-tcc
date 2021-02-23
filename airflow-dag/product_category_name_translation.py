@@ -24,9 +24,18 @@ def on_success(context, session=None):
 def clear_db(ds, **kwargs):
     clear_db_func(db_name+'.'+table_name)
 
-def load_data(ds, **kwargs):
-    load_data_func(file_full_path, db_name+'.'+table_name)
+def extract_data(ds, **kwargs):
+    print('DB table name: {db_table_name}'.format(db_table_name = db_name+'.'+table_name))
+    return storage.extract_data_from_csv(file_full_path)
 
+def transform_data(ds, **kwargs):
+    df = kwargs['task_instance'].xcom_pull(task_ids='extract_data')
+    return transform_data_func(df)    
+
+def load_data(ds, **kwargs):
+    df = kwargs['task_instance'].xcom_pull(task_ids='transform_data')
+    storage.load_data_into_db(df, db_name, table_name)
+ 
 # Truncate DB
 def clear_db_func(db_table_name):
     try:
@@ -36,26 +45,15 @@ def clear_db_func(db_table_name):
     except BaseException as e:
         raise ValueError(e)       
 
-# Save data into DB
-def load_data_func(file_path, db_table_name):
-
-    print('File name: {file_path}'.format(file_path = file_path))
-    print('DB table name: {db_table_name}'.format(db_table_name = db_table_name))
-
+# Validation, Cleansing, Transformation, Aggregation of data
+def transform_data_func(df):
     try:
-        df = pd.read_csv(file_path)
-
-        # Removes duplicate rows based on all columns.
+       # Removes duplicate rows based on all columns.
         df = df.drop_duplicates() 
 
-        df.to_sql(table_name,storage.engine_connect(),index=False,if_exists="append",schema=db_name)
-
-        connection=storage.engine_connect()
-        result = connection.execute('SELECT COUNT(*) FROM {db_table_name};'.format(db_table_name= db_table_name))
-        print('Row count: ' + str([{value for value in row} for row in result if result is not None][0]))
-        return True
-    except SQLAlchemyError as e:
-        raise ValueError(str(e.__dict__['orig']))
+        return df
+    except BaseException as e:
+        raise ValueError(e)  
 
 # Set Airflow args
 args = {
@@ -79,10 +77,22 @@ with DAG(
         python_callable=clear_db,
     )
 
+    extract_data = PythonOperator(
+        task_id='extract_data',
+        provide_context=True,
+        python_callable=extract_data,
+    )
+
+    transform_data = PythonOperator(
+        task_id='transform_data',
+        provide_context=True,
+        python_callable=transform_data,
+    )
+
     load_data = PythonOperator(
         task_id='load_data',
         provide_context=True,
         python_callable=load_data,
-    )
+    )    
 
-clear_db >> load_data
+clear_db >> extract_data >> transform_data >> load_data
