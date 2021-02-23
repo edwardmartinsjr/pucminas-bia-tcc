@@ -1,5 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.exc import SQLAlchemyError
+
 import os
 import pandas as pd
 
@@ -65,4 +67,16 @@ def data_load(file_name):
         df = pd.read_csv('/usr/local/airflow/files/'+file_name+'.csv')
         return df
     except BaseException as e:
-        print(e)  
+        print(e)
+        
+# Save data into DB
+def load_data_into_db(df, db_name, table_name):
+    try:
+        df.to_sql(table_name,engine_connect(),index=False,if_exists="append",schema=db_name)
+
+        connection=engine_connect()
+        result = connection.execute('SELECT COUNT(*) FROM {db_table_name};'.format(db_table_name= db_name+'.'+table_name))
+        print('Row count: ' + str([{value for value in row} for row in result if result is not None][0]))
+        return True
+    except SQLAlchemyError as e:
+        raise ValueError(str(e.__dict__['orig']))       

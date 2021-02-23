@@ -5,6 +5,7 @@ from datetime import datetime
 import os
 
 import product_category_name_translation as task
+from helpers import storage
 
 # START TESTS:
 class Test(unittest.TestCase):
@@ -20,7 +21,7 @@ class Test(unittest.TestCase):
         self.assertEqual(len(df.index),11)
         df = task.transform_data_func(df)
         self.assertEqual(len(df.index),10)
-        self.assertEqual(task.load_data_func(df),True)
+        self.assertEqual(storage.load_data_into_db(df, self.db_name, self.table_name),True)
         
 
 unittest.main()

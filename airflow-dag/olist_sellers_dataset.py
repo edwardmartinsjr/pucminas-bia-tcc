@@ -33,7 +33,7 @@ def transform_data(ds, **kwargs):
 
 def load_data(ds, **kwargs):
     df = kwargs['task_instance'].xcom_pull(task_ids='transform_data')
-    load_data_func(df)  
+    storage.load_data_into_db(df, db_name, table_name)  
 
 
 # Delete DB
@@ -68,17 +68,7 @@ def transform_data_func(df):
     except BaseException as e:
         raise ValueError(e)
     
-# Save data into DB    
-def load_data_func(df):
-    try:
-        df.to_sql(table_name,storage.engine_connect(),index=False,if_exists="append",schema=db_name)
-
-        connection=storage.engine_connect()
-        result = connection.execute('SELECT COUNT(*) FROM {db_table_name};'.format(db_table_name= db_name+'.'+table_name))
-        print('Row count: ' + str([{value for value in row} for row in result if result is not None][0]))
-        return True
-    except SQLAlchemyError as e:
-        raise ValueError(str(e.__dict__['orig']))     
+   
 
 # Set Airflow args
 args = {
