@@ -25,7 +25,7 @@ def clear_db(ds, **kwargs):
     clear_db_func(db_name+'.'+table_name)
 
 def extract_data(ds, **kwargs):
-    return extract_data_func(file_full_path, db_name+'.'+table_name)
+    return storage.extract_data_from_csv(file_full_path, db_name+'.'+table_name)
 
 def transform_data(ds, **kwargs):
     df = kwargs['task_instance'].xcom_pull(task_ids='extract_data')
@@ -45,18 +45,6 @@ def clear_db_func(db_table_name):
     except BaseException as e:
         raise ValueError(e)       
 
-# Extract data from CSV
-def extract_data_func(file_path, db_table_name):
-
-    print('File name: {file_path}'.format(file_path = file_path))
-    print('DB table name: {db_table_name}'.format(db_table_name = db_table_name))
-
-    try:
-        df = pd.read_csv(file_path)  
-
-        return df
-    except BaseException as e:
-        raise ValueError(e)
 
 # Validation, Cleansing, Transformation, Aggregation of data
 def transform_data_func(df):

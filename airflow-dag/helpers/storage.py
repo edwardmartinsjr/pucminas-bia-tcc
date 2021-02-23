@@ -79,4 +79,17 @@ def load_data_into_db(df, db_name, table_name):
         print('Row count: ' + str([{value for value in row} for row in result if result is not None][0]))
         return True
     except SQLAlchemyError as e:
-        raise ValueError(str(e.__dict__['orig']))       
+        raise ValueError(str(e.__dict__['orig']))
+
+# Extract data from CSV
+def extract_data_from_csv(file_path, db_table_name):
+
+    print('File name: {file_path}'.format(file_path = file_path))
+    print('DB table name: {db_table_name}'.format(db_table_name = db_table_name))
+
+    try:
+        df = pd.read_csv(file_path)
+
+        return df
+    except BaseException as e:
+        raise ValueError(e)           
