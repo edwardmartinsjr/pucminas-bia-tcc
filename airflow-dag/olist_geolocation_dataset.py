@@ -67,7 +67,7 @@ with DAG(
     dag_id=table_name,
     default_args=args,
     max_active_runs=1,
-    schedule_interval='00 12 * * 1',
+    schedule_interval='00 11 * * 1',
     catchup=False,
     on_success_callback = on_success,) as dag:
 
