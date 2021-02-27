@@ -36,20 +36,20 @@ def load_data(ds, **kwargs):
     df = kwargs['task_instance'].xcom_pull(task_ids='transform_data')
     storage.load_data_into_db(df, db_name, table_name)  
 
-# Truncate DB
+# Delete DB
 def clear_db_func(db_table_name):
     try:
-        print('Truncate DB: {db_table_name}'.format(db_table_name = db_table_name))
-        storage.truncate_db(db_table_name)
+        print('Delete DB: {db_table_name}'.format(db_table_name = db_table_name))
+        storage.delete_db(db_table_name)
         return True
     except BaseException as e:
-        raise ValueError(e)       
+        raise ValueError(e)      
 
 # Validation, Cleansing, Transformation, Aggregation of data
 def transform_data_func(df):
     try:
-        # Removes duplicate rows based on all columns.
-        df = df.drop_duplicates() 
+        # Remove duplicated primary key
+        df = df.drop_duplicates(subset=['geolocation_zip_code_prefix'])    
 
         return df
     except BaseException as e:

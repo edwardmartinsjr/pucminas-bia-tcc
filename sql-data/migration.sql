@@ -7,11 +7,12 @@ CREATE TABLE `olist_db`.`product_category_name_translation` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `olist_db`.`olist_geolocation_dataset` (
-  `geolocation_zip_code_prefix` text,
+  `geolocation_zip_code_prefix` VARCHAR(5),
   `geolocation_lat` double DEFAULT NULL,
   `geolocation_lng` double DEFAULT NULL,
   `geolocation_city` text,
-  `geolocation_state` text
+  `geolocation_state` text,
+  PRIMARY KEY (geolocation_zip_code_prefix)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `olist_db`.`olist_products_dataset` (
@@ -29,19 +30,25 @@ CREATE TABLE `olist_db`.`olist_products_dataset` (
 
 CREATE TABLE `olist_db`.`olist_sellers_dataset` (
   `seller_id` VARCHAR(50),
-  `seller_zip_code_prefix` text,
+  `seller_zip_code_prefix` VARCHAR(5),
   `seller_city` text,
   `seller_state` text,
-  PRIMARY KEY (seller_id)
+  PRIMARY KEY (seller_id),
+  FOREIGN KEY (seller_zip_code_prefix)
+        REFERENCES olist_db.olist_geolocation_dataset(geolocation_zip_code_prefix)
+        ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `olist_db`.`olist_customers_dataset` (
   `customer_id` VARCHAR(50),
   `customer_unique_id` VARCHAR(50),
-  `customer_zip_code_prefix` text,
+  `customer_zip_code_prefix` VARCHAR(5),
   `customer_city` text,
   `customer_state` text,
-  PRIMARY KEY (customer_id)
+  PRIMARY KEY (customer_id),
+  FOREIGN KEY (customer_zip_code_prefix)
+        REFERENCES olist_db.olist_geolocation_dataset(geolocation_zip_code_prefix)
+        ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `olist_db`.`olist_orders_dataset` (
