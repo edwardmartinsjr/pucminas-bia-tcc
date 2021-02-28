@@ -49,7 +49,25 @@ def clear_db_func(db_table_name):
 def transform_data_func(df):
     try:
         # Removes duplicate rows based on all columns.
-        df = df.drop_duplicates() 
+        df = df.drop_duplicates()
+        
+        # Load order_id from orders
+        connection = storage.engine_connect()
+        filter_df = pd.DataFrame(connection.execute('SELECT DISTINCT order_id FROM olist_db.olist_orders_dataset;'))
+        # Filter by zip_code_prefix
+        df = df[df.order_id.isin(filter_df[0])]
+
+        # Load product_id from sellers
+        connection = storage.engine_connect()
+        filter_df = pd.DataFrame(connection.execute('SELECT DISTINCT product_id FROM olist_db.olist_products_dataset;'))
+        # Filter by zip_code_prefix
+        df = df[df.product_id.isin(filter_df[0])]           
+        
+        # Load seller_id from sellers
+        connection = storage.engine_connect()
+        filter_df = pd.DataFrame(connection.execute('SELECT DISTINCT seller_id FROM olist_db.olist_sellers_dataset;'))
+        # Filter by zip_code_prefix
+        df = df[df.seller_id.isin(filter_df[0])]
 
         return df
     except BaseException as e:

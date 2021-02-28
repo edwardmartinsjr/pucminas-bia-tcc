@@ -49,7 +49,14 @@ def clear_db_func(db_table_name):
 def transform_data_func(df):
     try:
         # Remove duplicated primary key
-        df = df.drop_duplicates(subset=['order_id']) 
+        df = df.drop_duplicates(subset=['order_id'])
+        
+        # Load customer_id from customers
+        connection = storage.engine_connect()
+        filter_df = pd.DataFrame(connection.execute('SELECT DISTINCT customer_id FROM olist_db.olist_customers_dataset;'))
+        # Filter by zip_code_prefix
+        df = df[df.customer_id.isin(filter_df[0])]
+
 
         return df
     except BaseException as e:
