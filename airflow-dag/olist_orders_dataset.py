@@ -53,10 +53,9 @@ def transform_data_func(df):
         
         # Load customer_id from customers
         connection = storage.engine_connect()
-        geolocation_df = pd.DataFrame(connection.execute('SELECT DISTINCT customer_id FROM olist_db.olist_customers_dataset;'))
-
+        filter_df = pd.DataFrame(connection.execute('SELECT DISTINCT customer_id FROM olist_db.olist_customers_dataset;'))
         # Filter by zip_code_prefix
-        df = df[df.customer_id.isin(geolocation_df[0])]
+        df = df[df.customer_id.isin(filter_df[0])]
 
 
         return df

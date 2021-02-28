@@ -53,10 +53,9 @@ def transform_data_func(df):
         
         # Load zip_code_prefix from geolocation
         connection = storage.engine_connect()
-        geolocation_df = pd.DataFrame(connection.execute('SELECT DISTINCT geolocation_zip_code_prefix FROM olist_db.olist_geolocation_dataset;'))
-
+        filter_df = pd.DataFrame(connection.execute('SELECT DISTINCT geolocation_zip_code_prefix FROM olist_db.olist_geolocation_dataset;'))
         # Filter by zip_code_prefix
-        df = df[df.customer_zip_code_prefix.isin(geolocation_df[0])]
+        df = df[df.customer_zip_code_prefix.isin(filter_df[0])]
 
         return df
     except BaseException as e:
