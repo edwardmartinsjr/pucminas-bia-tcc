@@ -16,7 +16,7 @@ Install application dependencies:
 
 MySQL:
 - `docker pull mysql/mysql-server:8.0`
-- `docker run --name=mysql1 -e MYSQL_ROOT_PASSWORD=mysql -p 3306:3306 mysql/mysql-server:8.0 --default-authentication-plugin=mysql_native_password`
+- `docker run -d --name=mysql1 -e MYSQL_ROOT_PASSWORD=mysql -p 3306:3306 mysql/mysql-server:8.0 --default-authentication-plugin=mysql_native_password`
 - `docker exec -it mysql1 mysql -uroot -p`
 - `ALTER USER 'root'@'localhost' IDENTIFIED BY 'mysql';`
 - `CREATE USER 'sa'@'localhost' IDENTIFIED BY 'sa';`
