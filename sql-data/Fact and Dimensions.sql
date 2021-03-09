@@ -33,7 +33,8 @@ SELECT @rownr:=@rownr+1 AS state_id, customers.state AS state FROM (SELECT DISTI
 DROP TABLE IF EXISTS olist_db.d_city;
 SET @rownr=0;
 CREATE TABLE olist_db.d_city
-SELECT @rownr:=@rownr+1 AS city_id, state_id, customers.customer_city AS city FROM (SELECT DISTINCT customer_city, customer_state FROM olist_db.olist_customers_dataset) AS customers
+SELECT @rownr:=@rownr+1 AS city_id, state_id, customers.customer_city AS city FROM (SELECT DISTINCT olist_customers_dataset.customer_id, customer_city, customer_state FROM olist_db.olist_customers_dataset AS olist_customers_dataset
+INNER JOIN olist_db.olist_orders_dataset AS olist_orders_datase ON olist_orders_datase.customer_id = olist_customers_dataset.customer_id) AS customers
 INNER JOIN olist_db.d_state AS location_state ON location_state.state = customers.customer_state;
 -- TEST
 -- SELECT COUNT(*) FROM olist_db.d_city;
@@ -41,6 +42,13 @@ INNER JOIN olist_db.d_state AS location_state ON location_state.state = customer
 -- SELECT city, state FROM olist_db.d_city as location_city
 -- INNER JOIN olist_db.d_state as location_state ON location_state.state_id = location_city.state_id
 -- WHERE state = 'MG' order by city;
+
+DROP TABLE IF EXISTS olist_db.temp_city;
+SET @rownr=0;
+CREATE TEMPORARY TABLE olist_db.temp_city
+SELECT @rownr:=@rownr+1 AS city_id, state_id, customers.customer_city AS city, customers.customer_id FROM (SELECT DISTINCT olist_customers_dataset.customer_id, customer_city, customer_state FROM olist_db.olist_customers_dataset AS olist_customers_dataset
+INNER JOIN olist_db.olist_orders_dataset AS olist_orders_datase ON olist_orders_datase.customer_id = olist_customers_dataset.customer_id) AS customers
+INNER JOIN olist_db.d_state AS location_state ON location_state.state = customers.customer_state;
 
 -- DIM_PAYMENT_TYPE --
 DROP TABLE IF EXISTS olist_db.d_payment_type;
@@ -92,7 +100,8 @@ DROP TABLE IF EXISTS olist_db.f_sales;
 SET @payment_id=0;
 CREATE TABLE olist_db.f_sales
 SELECT DISTINCT
-product_id
+customers_dataset.customer_id
+, product_id
 , city_id
 , payment_id
 , review_id
@@ -101,7 +110,7 @@ olist_db.olist_orders_dataset AS orders_dataset
 LEFT JOIN olist_db.olist_order_items_dataset AS order_items_dataset ON order_items_dataset.order_id = orders_dataset.order_id
 INNER JOIN olist_db.temp_payment AS temp_payment ON temp_payment.order_id = orders_dataset.order_id
 INNER JOIN olist_db.olist_customers_dataset AS customers_dataset ON customers_dataset.customer_id = orders_dataset.customer_id
-LEFT JOIN olist_db.d_city AS city ON city.city = customers_dataset.customer_city
+LEFT JOIN olist_db.temp_city AS temp_city ON temp_city.customer_id = customers_dataset.customer_id
 LEFT JOIN olist_db.temp_review AS temp_review ON temp_review.order_id = orders_dataset.order_id;
 -- TEST
 -- SELECT * FROM olist_db.f_sales limit 100;
@@ -111,20 +120,39 @@ LEFT JOIN olist_db.temp_review AS temp_review ON temp_review.order_id = orders_d
 -- UNION
 -- select payment_value from  olist_db.olist_order_payments_dataset where order_id = '00337fe25a3780b3424d9ad7c5a4b35e';
 
-SELECT count(distinct sales.product_id) FROM olist_db.f_sales as sales
+-- SELECT count(distinct sales.product_id) FROM olist_db.f_sales as sales
+-- INNER JOIN olist_db.d_product AS product ON product.product_id = sales.product_id
+-- INNER JOIN olist_db.d_product_category AS product_category ON product_category.category_id = product.category_id
+-- INNER JOIN olist_db.d_city AS city ON city.city_id = sales.city_id
+-- INNER JOIN olist_db.d_state AS state ON state.state_id = city.state_id
+-- WHERE category_name = 'consoles_games'
+-- AND state = 'MG'
+-- UNION
+-- SELECT count(distinct products_dataset.product_id) FROM olist_db.olist_orders_dataset as orders_dataset
+-- INNER JOIN olist_db.olist_order_items_dataset as order_items_dataset on order_items_dataset.order_id = orders_dataset.order_id
+-- INNER JOIN olist_db.olist_products_dataset as products_dataset on products_dataset.product_id = order_items_dataset.product_id
+-- INNER JOIN olist_db.olist_customers_dataset as customers_dataset on customers_dataset.customer_id = orders_dataset.customer_id
+-- WHERE product_category_name = 'consoles_games'
+-- AND customer_state = 'MG'
+
+SELECT count(distinct customer_id, sales.product_id, city, state) FROM olist_db.f_sales as sales
 INNER JOIN olist_db.d_product AS product ON product.product_id = sales.product_id
 INNER JOIN olist_db.d_product_category AS product_category ON product_category.category_id = product.category_id
 INNER JOIN olist_db.d_city AS city ON city.city_id = sales.city_id
 INNER JOIN olist_db.d_state AS state ON state.state_id = city.state_id
+INNER JOIN olist_db.d_payment AS payment ON payment.payment_id = sales.payment_id
+INNER JOIN olist_db.d_payment_type AS payment_type ON payment_type.type_id = payment.type_id
 WHERE category_name = 'consoles_games'
 AND state = 'MG'
+AND payment_type = 'boleto'
+-- AND sales.product_id = '2bd9b51a9ab079e095aca987845d3266'
 UNION
-SELECT count(distinct products_dataset.product_id) FROM olist_db.olist_orders_dataset as orders_dataset
+SELECT count(distinct orders_dataset.customer_id, products_dataset.product_id, customer_city, customer_state) FROM olist_db.olist_orders_dataset as orders_dataset
 INNER JOIN olist_db.olist_order_items_dataset as order_items_dataset on order_items_dataset.order_id = orders_dataset.order_id
 INNER JOIN olist_db.olist_products_dataset as products_dataset on products_dataset.product_id = order_items_dataset.product_id
 INNER JOIN olist_db.olist_customers_dataset as customers_dataset on customers_dataset.customer_id = orders_dataset.customer_id
+INNER JOIN olist_db.olist_order_payments_dataset as order_payments_dataset on order_payments_dataset.order_id = orders_dataset.order_id
 WHERE product_category_name = 'consoles_games'
 AND customer_state = 'MG'
-
-
-
+AND payment_type = 'boleto'
+-- AND products_dataset.product_id = '2bd9b51a9ab079e095aca987845d3266'
