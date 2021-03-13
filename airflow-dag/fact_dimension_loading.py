@@ -103,7 +103,78 @@ def year_dim(ds, **kwargs):
     query = '''INSERT INTO olist_db.d_year (`year`)
     SELECT YEAR(order_approved_at) AS `year` FROM olist_db.olist_orders_dataset
     WHERE order_approved_at IS NOT NULL;'''
-    query_execute(query,'d_year')         
+    query_execute(query,'d_year')
+    
+def sales_fact(ds, **kwargs):
+    query = '''
+    DROP TABLE IF EXISTS olist_db.temp_city;
+    SET @rownr=0;
+    CREATE TEMPORARY TABLE olist_db.temp_city
+    SELECT @rownr:=@rownr+1 AS city_id, state_id, customers.customer_city AS city, customers.customer_id FROM (SELECT DISTINCT olist_customers_dataset.customer_id, customer_city, customer_state FROM olist_db.olist_customers_dataset AS olist_customers_dataset
+    INNER JOIN olist_db.olist_orders_dataset AS olist_orders_datase ON olist_orders_datase.customer_id = olist_customers_dataset.customer_id) AS customers
+    INNER JOIN olist_db.d_state AS location_state ON location_state.state = customers.customer_state;
+
+    DROP TABLE IF EXISTS olist_db.temp_payment;
+    SET @rownr=0;
+    CREATE TEMPORARY TABLE olist_db.temp_payment
+    SELECT @rownr:=@rownr+1 AS payment_id, type_id, order_id, payment_sequential, payment_installments, payment_value FROM olist_db.olist_order_payments_dataset AS payments_dataset
+    INNER JOIN olist_db.d_payment_type AS payment_type ON payment_type.payment_type = payments_dataset.payment_type;
+
+    DROP TABLE IF EXISTS olist_db.temp_review;
+    CREATE TEMPORARY TABLE olist_db.temp_review
+    SELECT review_id, order_id, review_score FROM olist_db.olist_order_reviews_dataset;
+
+    DROP TABLE IF EXISTS olist_db.temp_hour;
+    SET @rownr=0;
+    CREATE TEMPORARY TABLE olist_db.temp_hour
+    SELECT @rownr:=@rownr+1 AS hour_id, order_id, HOUR(order_approved_at) AS `hour` FROM olist_db.olist_orders_dataset
+    WHERE order_approved_at IS NOT NULL;
+
+    DROP TABLE IF EXISTS olist_db.temp_day;
+    SET @rownr=0;
+    CREATE TEMPORARY TABLE olist_db.temp_day
+    SELECT @rownr:=@rownr+1 AS day_id, order_id, DAY(order_approved_at) AS `day` FROM olist_db.olist_orders_dataset
+    WHERE order_approved_at IS NOT NULL;
+
+    DROP TABLE IF EXISTS olist_db.temp_month;
+    SET @rownr=0;
+    CREATE TEMPORARY TABLE olist_db.temp_month
+    SELECT @rownr:=@rownr+1 AS month_id, order_id, MONTH(order_approved_at) AS `month` FROM olist_db.olist_orders_dataset
+    WHERE order_approved_at IS NOT NULL;
+
+    DROP TABLE IF EXISTS olist_db.temp_year;
+    SET @rownr=0;
+    CREATE TEMPORARY TABLE olist_db.temp_year
+    SELECT @rownr:=@rownr+1 AS year_id, order_id, YEAR(order_approved_at) AS `year` FROM olist_db.olist_orders_dataset
+    WHERE order_approved_at IS NOT NULL;
+
+    -- FACT_SALES --
+    INSERT INTO olist_db.f_sales (order_id, product_id, city_id, payment_id, review_id, hour_id, day_id, month_id, year_id, price)
+    (SELECT 
+    orders_dataset.order_id
+    , product_id
+    , city_id
+    , payment_id
+    , review_id
+    , hour_id
+    , day_id
+    , month_id
+    , year_id
+    , order_items_dataset.price
+    FROM 
+    olist_db.olist_orders_dataset AS orders_dataset
+    INNER JOIN olist_db.olist_order_items_dataset AS order_items_dataset ON order_items_dataset.order_id = orders_dataset.order_id
+    INNER JOIN olist_db.temp_payment AS temp_payment ON temp_payment.order_id = orders_dataset.order_id
+    INNER JOIN olist_db.olist_customers_dataset AS customers_dataset ON customers_dataset.customer_id = orders_dataset.customer_id
+    INNER JOIN olist_db.temp_city AS temp_city ON temp_city.customer_id = customers_dataset.customer_id
+    LEFT JOIN olist_db.temp_review AS temp_review ON temp_review.order_id = orders_dataset.order_id
+    LEFT JOIN olist_db.temp_hour AS temp_hour ON temp_hour.order_id = orders_dataset.order_id
+    LEFT JOIN olist_db.temp_day AS temp_day ON temp_day.order_id = orders_dataset.order_id
+    LEFT JOIN olist_db.temp_month AS temp_month ON temp_month.order_id = orders_dataset.order_id
+    LEFT JOIN olist_db.temp_year AS temp_year ON temp_year.order_id = orders_dataset.order_id
+    WHERE order_approved_at IS NOT NULL);
+    '''
+    query_execute(query,'f_sales')        
 
 # Execute query        
 def query_execute(query, table_name):
@@ -216,6 +287,12 @@ with DAG(
         task_id='year_dim',
         provide_context=True,
         python_callable=year_dim,
-    )    
+    )
+    
+    sales_fact = PythonOperator(
+        task_id='sales_fact',
+        provide_context=True,
+        python_callable=sales_fact,
+    )     
 
-clear_db >> state_dim >> city_dim >> payment_type_dim >> payment_dim >> product_category_dim >> product_dim >> review_dim >> order_dim >> hour_dim >> day_dim >> month_dim >> year_dim 
+clear_db >> state_dim >> city_dim >> payment_type_dim >> payment_dim >> product_category_dim >> product_dim >> review_dim >> order_dim >> hour_dim >> day_dim >> month_dim >> year_dim >> sales_fact
