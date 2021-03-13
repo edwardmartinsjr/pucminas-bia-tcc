@@ -33,7 +33,21 @@ def clear_db(ds, **kwargs):
     clear_db_func(db_name+'.d_hour')
     clear_db_func(db_name+'.d_day')
     clear_db_func(db_name+'.d_month')
-    clear_db_func(db_name+'.d_year')  
+    clear_db_func(db_name+'.d_year')
+
+def set_autoincrement(ds, **kwargs):
+    query = '''
+    ALTER TABLE `olist_db`.`d_state` AUTO_INCREMENT=1;
+    ALTER TABLE `olist_db`.`d_city` AUTO_INCREMENT=1;
+    ALTER TABLE `olist_db`.`d_payment_type` AUTO_INCREMENT=1;
+    ALTER TABLE `olist_db`.`d_payment` AUTO_INCREMENT=1;
+    ALTER TABLE `olist_db`.`d_product_category` AUTO_INCREMENT=1;
+    ALTER TABLE `olist_db`.`d_hour` AUTO_INCREMENT=1;
+    ALTER TABLE `olist_db`.`d_day` AUTO_INCREMENT=1;
+    ALTER TABLE `olist_db`.`d_month` AUTO_INCREMENT=1;
+    ALTER TABLE `olist_db`.`d_year` AUTO_INCREMENT=1;'''
+    query_execute(query,'f_sales')
+
 
 def state_dim(ds, **kwargs):
     query = '''INSERT INTO olist_db.d_state (state) 
@@ -251,6 +265,12 @@ with DAG(
         python_callable=clear_db,
     )
 
+    set_autoincrement = PythonOperator(
+        task_id='set_autoincrement',
+        provide_context=True,
+        python_callable=set_autoincrement,
+    )    
+
     state_dim = PythonOperator(
         task_id='state_dim',
         provide_context=True,
@@ -329,4 +349,4 @@ with DAG(
         python_callable=sales_fact,
     )     
 
-clear_db >> state_dim >> city_dim >> payment_type_dim >> payment_dim >> product_category_dim >> product_dim >> review_dim >> order_dim >> hour_dim >> day_dim >> month_dim >> year_dim >> sales_fact
+clear_db >> set_autoincrement >> state_dim >> city_dim >> payment_type_dim >> payment_dim >> product_category_dim >> product_dim >> review_dim >> order_dim >> hour_dim >> day_dim >> month_dim >> year_dim >> sales_fact
