@@ -120,7 +120,7 @@ ALTER TABLE `olist_db`.`d_state` AUTO_INCREMENT=1;
 
 CREATE TABLE `olist_db`.`d_city` (
   `city_id` bigint NOT NULL AUTO_INCREMENT,
-  `state_id` bigint DEFAULT NULL,
+  `state_id` bigint NOT NULL,
   `city` text,
   PRIMARY KEY (`city_id`),
   KEY `state_id_idx` (`state_id`),
@@ -137,10 +137,10 @@ ALTER TABLE `olist_db`.`d_payment_type` AUTO_INCREMENT=1;
 
 CREATE TABLE `olist_db`.`d_payment` (
   `payment_id` bigint NOT NULL AUTO_INCREMENT,
-  `type_id` bigint DEFAULT NULL,
-  `payment_sequential` int DEFAULT NULL,
-  `payment_installments` int DEFAULT NULL,
-  `payment_value` double DEFAULT NULL,
+  `type_id` bigint NOT NULL,
+  `payment_sequential` int NOT NULL,
+  `payment_installments` int NOT NULL,
+  `payment_value` double NOT NULL,
   PRIMARY KEY (`payment_id`),
   KEY `type_id_idx` (`type_id`),
   CONSTRAINT `type_id` FOREIGN KEY (`type_id`) REFERENCES `d_payment_type` (`type_id`)
@@ -167,34 +167,34 @@ CREATE TABLE `olist_db`.`d_product` (
 
 CREATE TABLE `olist_db`.`d_review` (
   `review_id` varchar(50) NOT NULL,
-  `review_score` int DEFAULT NULL,
+  `review_score` int NOT NULL,
   PRIMARY KEY (`review_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `olist_db`.`d_hour` (
   `hour_id` bigint NOT NULL AUTO_INCREMENT,
-  `hour` int DEFAULT NULL,
+  `hour` int NOT NULL,
   PRIMARY KEY (`hour_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 ALTER TABLE `olist_db`.`d_hour` AUTO_INCREMENT=1;
 
 CREATE TABLE `olist_db`.`d_day` (
   `day_id` bigint NOT NULL AUTO_INCREMENT,
-  `day` int DEFAULT NULL,
+  `day` int NOT NULL,
   PRIMARY KEY (`day_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 ALTER TABLE `olist_db`.`d_day` AUTO_INCREMENT=1;
 
 CREATE TABLE `olist_db`.`d_month` (
   `month_id` bigint NOT NULL AUTO_INCREMENT,
-  `month` int DEFAULT NULL,
+  `month` int NOT NULL,
   PRIMARY KEY (`month_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 ALTER TABLE `olist_db`.`d_month` AUTO_INCREMENT=1;
 
 CREATE TABLE `olist_db`.`d_year` (
   `year_id` bigint NOT NULL AUTO_INCREMENT,
-  `year` int DEFAULT NULL,
+  `year` int NOT NULL,
   PRIMARY KEY (`year_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 ALTER TABLE `olist_db`.`d_year` AUTO_INCREMENT=1;
@@ -206,10 +206,10 @@ CREATE TABLE `olist_db`.`d_order` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `olist_db`.`f_sales` (
-  `order_id` varchar(50) DEFAULT NULL,
-  `product_id` varchar(50) DEFAULT NULL,
-  `city_id` bigint DEFAULT NULL,
-  `payment_id` bigint DEFAULT NULL,
+  `order_id` varchar(50) NOT NULL,
+  `product_id` varchar(50) NOT NULL,
+  `city_id` bigint NOT NULL,
+  `payment_id` bigint NOT NULL,
   `review_id` varchar(50),
   `hour_id` bigint NOT NULL,
   `day_id` bigint NOT NULL,
