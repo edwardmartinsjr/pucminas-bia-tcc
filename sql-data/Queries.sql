@@ -92,3 +92,15 @@ INNER JOIN olist_db.olist_order_payments_dataset AS order_payments_dataset ON or
 INNER JOIN olist_db.olist_products_dataset as products_dataset on products_dataset.product_id = order_items_dataset.product_id
 where products_dataset.product_id = 'df3655ac9aa8c6cbfa63bdd8d3b09c50'
 order by order_approved_at;
+
+SELECT sum(price) FROM (
+	SELECT max(price) as price FROM olist_db.f_sales
+    group by order_id
+) as sales
+UNION
+SELECT sum(price) from 
+(SELECT max(price) as price FROM olist_db.olist_orders_dataset AS orders_dataset
+INNER JOIN olist_db.olist_order_items_dataset AS order_items_dataset ON order_items_dataset.order_id = orders_dataset.order_id
+INNER JOIN olist_db.olist_order_payments_dataset AS order_payments_dataset ON order_payments_dataset.order_id = orders_dataset.order_id
+WHERE order_approved_at IS NOT NULL
+group by orders_dataset.order_id) as orders
