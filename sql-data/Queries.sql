@@ -103,7 +103,7 @@ SELECT sum(price) from
 INNER JOIN olist_db.olist_order_items_dataset AS order_items_dataset ON order_items_dataset.order_id = orders_dataset.order_id
 INNER JOIN olist_db.olist_order_payments_dataset AS order_payments_dataset ON order_payments_dataset.order_id = orders_dataset.order_id
 WHERE order_approved_at IS NOT NULL
-group by orders_dataset.order_id) as order;
+group by orders_dataset.order_id) as orders;
 
 select count(*) from olist_db.f_sales
 UNION
@@ -130,3 +130,4 @@ UNION
 select count(*) from olist_db.d_month
 UNION
 select count(*) from olist_db.d_year; 
+
