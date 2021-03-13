@@ -1,5 +1,24 @@
+SELECT count(distinct orders_dataset.order_id)
+FROM 
+olist_db.olist_orders_dataset AS orders_dataset
+INNER JOIN olist_db.olist_order_items_dataset AS order_items_dataset ON order_items_dataset.order_id = orders_dataset.order_id
+INNER JOIN olist_db.temp_payment AS temp_payment ON temp_payment.order_id = orders_dataset.order_id
+INNER JOIN olist_db.olist_customers_dataset AS customers_dataset ON customers_dataset.customer_id = orders_dataset.customer_id
+INNER JOIN olist_db.temp_city AS temp_city ON temp_city.customer_id = customers_dataset.customer_id
+LEFT JOIN olist_db.temp_review AS temp_review ON temp_review.order_id = orders_dataset.order_id
+LEFT JOIN olist_db.temp_hour AS temp_hour ON temp_hour.order_id = orders_dataset.order_id
+LEFT JOIN olist_db.temp_day AS temp_day ON temp_day.order_id = orders_dataset.order_id
+LEFT JOIN olist_db.temp_month AS temp_month ON temp_month.order_id = orders_dataset.order_id
+LEFT JOIN olist_db.temp_year AS temp_year ON temp_year.order_id = orders_dataset.order_id
+WHERE order_approved_at IS NOT NULL
+UNION
+SELECT count(distinct orders_dataset.order_id) 
+FROM 
+olist_db.olist_orders_dataset AS orders_dataset
+INNER JOIN olist_db.olist_order_items_dataset AS order_items_dataset ON order_items_dataset.order_id = orders_dataset.order_id
+INNER JOIN olist_db.olist_order_payments_dataset AS order_payments_dataset ON order_payments_dataset.order_id = orders_dataset.order_id
+WHERE order_approved_at IS NOT NULL;
 
-SELECT * FROM olist_db.f_sales limit 100;
 SELECT distinct payment_value FROM olist_db.f_sales AS sales 
 INNER JOIN olist_db.d_payment AS payment ON payment.payment_id = sales.payment_id
 WHERE order_id = '00337fe25a3780b3424d9ad7c5a4b35e'
@@ -19,7 +38,7 @@ INNER JOIN olist_db.olist_order_items_dataset as order_items_dataset on order_it
 INNER JOIN olist_db.olist_products_dataset as products_dataset on products_dataset.product_id = order_items_dataset.product_id
 INNER JOIN olist_db.olist_customers_dataset as customers_dataset on customers_dataset.customer_id = orders_dataset.customer_id
 WHERE product_category_name = 'consoles_games'
-AND customer_state = 'MG'
+AND customer_state = 'MG';
 
 SELECT count(distinct sales.product_id, city, state) FROM olist_db.f_sales as sales
 INNER JOIN olist_db.d_product AS product ON product.product_id = sales.product_id
@@ -40,5 +59,36 @@ INNER JOIN olist_db.olist_customers_dataset as customers_dataset on customers_da
 INNER JOIN olist_db.olist_order_payments_dataset as order_payments_dataset on order_payments_dataset.order_id = orders_dataset.order_id
 WHERE product_category_name = 'consoles_games'
 AND customer_state = 'MG'
-AND payment_type = 'boleto'
+AND payment_type = 'boleto';
 -- AND products_dataset.product_id = '2bd9b51a9ab079e095aca987845d3266'
+
+SELECT count(distinct order_id) FROM olist_db.f_sales as sales
+UNION
+SELECT count(distinct orders_dataset.order_id) FROM olist_db.olist_orders_dataset AS orders_dataset
+INNER JOIN olist_db.olist_order_items_dataset AS order_items_dataset ON order_items_dataset.order_id = orders_dataset.order_id
+INNER JOIN olist_db.olist_order_payments_dataset AS order_payments_dataset ON order_payments_dataset.order_id = orders_dataset.order_id
+WHERE order_approved_at IS NOT NULL;
+
+SELECT count(distinct product_id) FROM olist_db.f_sales as sales
+INNER JOIN olist_db.d_day as d_day on d_day.day_id = sales.day_id
+where `day` = 1
+UNION
+SELECT count(distinct products_dataset.product_id) FROM olist_db.olist_orders_dataset as orders_dataset
+INNER JOIN olist_db.olist_order_items_dataset as order_items_dataset on order_items_dataset.order_id = orders_dataset.order_id
+INNER JOIN olist_db.olist_products_dataset as products_dataset on products_dataset.product_id = order_items_dataset.product_id
+where day(order_approved_at) = 1;
+
+SELECT  product_id, `year`, `month`, `day`, `hour`, price  FROM olist_db.f_sales as sales
+INNER JOIN olist_db.d_hour as d_hour on d_hour.hour_id = sales.hour_id
+INNER JOIN olist_db.d_day as d_day on d_day.day_id = sales.day_id
+INNER JOIN olist_db.d_month as d_month on d_month.month_id = sales.month_id
+INNER JOIN olist_db.d_year as d_year on d_year.year_id = sales.year_id
+where sales.product_id = 'df3655ac9aa8c6cbfa63bdd8d3b09c50'
+order by `year`, `month`, `day`, `hour`;
+
+SELECT products_dataset.product_id, order_approved_at, order_items_dataset.price FROM olist_db.olist_orders_dataset as orders_dataset
+INNER JOIN olist_db.olist_order_items_dataset AS order_items_dataset ON order_items_dataset.order_id = orders_dataset.order_id
+INNER JOIN olist_db.olist_order_payments_dataset AS order_payments_dataset ON order_payments_dataset.order_id = orders_dataset.order_id
+INNER JOIN olist_db.olist_products_dataset as products_dataset on products_dataset.product_id = order_items_dataset.product_id
+where products_dataset.product_id = 'df3655ac9aa8c6cbfa63bdd8d3b09c50'
+order by order_approved_at;

@@ -1,5 +1,6 @@
 -- DELETE -- 
 DROP TABLE IF EXISTS olist_db.f_sales;
+DROP TABLE IF EXISTS olist_db.d_order;
 DROP TABLE IF EXISTS olist_db.d_review;
 DROP TABLE IF EXISTS olist_db.d_product;
 DROP TABLE IF EXISTS olist_db.d_product_category;
@@ -7,7 +8,6 @@ DROP TABLE IF EXISTS olist_db.d_payment;
 DROP TABLE IF EXISTS olist_db.d_payment_type;
 DROP TABLE IF EXISTS olist_db.d_city;
 DROP TABLE IF EXISTS olist_db.d_state;
-DROP TABLE IF EXISTS olist_db.d_time;
 DROP TABLE IF EXISTS olist_db.d_hour;
 DROP TABLE IF EXISTS olist_db.d_day;
 DROP TABLE IF EXISTS olist_db.d_month;
@@ -102,39 +102,41 @@ CREATE TABLE `olist_db`.`d_year` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 ALTER TABLE `olist_db`.`d_year` AUTO_INCREMENT=1;
 
-CREATE TABLE `olist_db`.`d_time` (
-  `time_id` bigint NOT NULL AUTO_INCREMENT,
-  `hour_id` bigint NOT NULL,
-  `day_id` bigint NOT NULL,
-  `month_id` bigint NOT NULL,
-  `year_id` bigint NOT NULL,
-  PRIMARY KEY (`time_id`),
-  KEY `hour_id_idx` (`hour_id`),
-  KEY `day_id_idx` (`day_id`),
-  KEY `month_id_idx` (`month_id`),
-  KEY `year_id_idx` (`year_id`),
-  CONSTRAINT `hour_id` FOREIGN KEY (`hour_id`) REFERENCES `d_hour` (`hour_id`),
-  CONSTRAINT `day_id` FOREIGN KEY (`day_id`) REFERENCES `d_day` (`day_id`),
-  CONSTRAINT `month_id` FOREIGN KEY (`month_id`) REFERENCES `d_month` (`month_id`),
-  CONSTRAINT `year_id` FOREIGN KEY (`year_id`) REFERENCES `d_year` (`year_id`)
+CREATE TABLE `olist_db`.`d_order` (
+  `order_id` varchar(50) NOT NULL,
+  `order_status` text,
+  PRIMARY KEY (`order_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `olist_db`.`f_sales` (
+  `order_id` varchar(50) DEFAULT NULL,
   `product_id` varchar(50) DEFAULT NULL,
   `city_id` bigint DEFAULT NULL,
   `payment_id` bigint DEFAULT NULL,
   `review_id` varchar(50),
-  `time_id` bigint DEFAULT NULL,
+  `hour_id` bigint NOT NULL,
+  `day_id` bigint NOT NULL,
+  `month_id` bigint NOT NULL,
+  `year_id` bigint NOT NULL,
+  price double NOT NULL,
+  KEY `order_id_idx` (`order_id`),
   KEY `product_id_idx` (`product_id`),
   KEY `city_id_idx` (`city_id`),
   KEY `payment_id_idx` (`payment_id`),
   KEY `review_id_idx` (`review_id`),
-  KEY `time_id_idx` (`time_id`),
+  KEY `hour_id_idx` (`hour_id`),
+  KEY `day_id_idx` (`day_id`),
+  KEY `month_id_idx` (`month_id`),
+  KEY `year_id_idx` (`year_id`),
+  CONSTRAINT `order_id` FOREIGN KEY (`order_id`) REFERENCES `d_order` (`order_id`),
   CONSTRAINT `city_id` FOREIGN KEY (`city_id`) REFERENCES `d_city` (`city_id`),
   CONSTRAINT `payment_id` FOREIGN KEY (`payment_id`) REFERENCES `d_payment` (`payment_id`),
   CONSTRAINT `product_id` FOREIGN KEY (`product_id`) REFERENCES `d_product` (`product_id`),
   CONSTRAINT `review_id` FOREIGN KEY (`review_id`) REFERENCES `d_review` (`review_id`),
-  CONSTRAINT `time_id` FOREIGN KEY (`time_id`) REFERENCES `d_time` (`time_id`)
+  CONSTRAINT `hour_id` FOREIGN KEY (`hour_id`) REFERENCES `d_hour` (`hour_id`),
+  CONSTRAINT `day_id` FOREIGN KEY (`day_id`) REFERENCES `d_day` (`day_id`),
+  CONSTRAINT `month_id` FOREIGN KEY (`month_id`) REFERENCES `d_month` (`month_id`),
+  CONSTRAINT `year_id` FOREIGN KEY (`year_id`) REFERENCES `d_year` (`year_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
@@ -166,6 +168,25 @@ INNER JOIN olist_db.olist_order_items_dataset AS order_items_dataset ON order_it
 INSERT INTO olist_db.d_review (review_id, review_score)
 (SELECT review_id, review_score FROM olist_db.olist_order_reviews_dataset);
 
+INSERT INTO olist_db.d_order (order_id, order_status)
+(SELECT order_id, order_status FROM olist_db.olist_orders_dataset);
+
+INSERT INTO olist_db.d_hour (`hour`)
+SELECT HOUR(order_approved_at) AS `hour` FROM olist_db.olist_orders_dataset
+WHERE order_approved_at IS NOT NULL;
+
+INSERT INTO olist_db.d_day (`day`)
+SELECT DAY(order_approved_at) AS `day` FROM olist_db.olist_orders_dataset
+WHERE order_approved_at IS NOT NULL;
+
+INSERT INTO olist_db.d_month (`month`)
+SELECT MONTH(order_approved_at) AS `month` FROM olist_db.olist_orders_dataset
+WHERE order_approved_at IS NOT NULL;
+
+INSERT INTO olist_db.d_year (`year`)
+SELECT YEAR(order_approved_at) AS `year` FROM olist_db.olist_orders_dataset
+WHERE order_approved_at IS NOT NULL;
+
 -- TEMPORARY TABLES --
 DROP TABLE IF EXISTS olist_db.temp_city;
 SET @rownr=0;
@@ -187,39 +208,49 @@ SELECT review_id, order_id, review_score FROM olist_db.olist_order_reviews_datas
 DROP TABLE IF EXISTS olist_db.temp_hour;
 SET @rownr=0;
 CREATE TEMPORARY TABLE olist_db.temp_hour
-SELECT @rownr:=@rownr+1 AS hour_id, order_id, HOUR(order_approved_at) FROM olist_db.olist_orders_dataset
+SELECT @rownr:=@rownr+1 AS hour_id, order_id, HOUR(order_approved_at) AS `hour` FROM olist_db.olist_orders_dataset
 WHERE order_approved_at IS NOT NULL;
 
 DROP TABLE IF EXISTS olist_db.temp_day;
 SET @rownr=0;
 CREATE TEMPORARY TABLE olist_db.temp_day
-SELECT @rownr:=@rownr+1 AS day_id, order_id, DAY(order_approved_at) FROM olist_db.olist_orders_dataset
+SELECT @rownr:=@rownr+1 AS day_id, order_id, DAY(order_approved_at) AS `day` FROM olist_db.olist_orders_dataset
 WHERE order_approved_at IS NOT NULL;
 
 DROP TABLE IF EXISTS olist_db.temp_month;
 SET @rownr=0;
 CREATE TEMPORARY TABLE olist_db.temp_month
-SELECT @rownr:=@rownr+1 AS month_id, order_id, MONTH(order_approved_at) FROM olist_db.olist_orders_dataset
+SELECT @rownr:=@rownr+1 AS month_id, order_id, MONTH(order_approved_at) AS `month` FROM olist_db.olist_orders_dataset
 WHERE order_approved_at IS NOT NULL;
 
 DROP TABLE IF EXISTS olist_db.temp_year;
 SET @rownr=0;
 CREATE TEMPORARY TABLE olist_db.temp_year
-SELECT @rownr:=@rownr+1 AS year_id, order_id, YEAR(order_approved_at) FROM olist_db.olist_orders_dataset
+SELECT @rownr:=@rownr+1 AS year_id, order_id, YEAR(order_approved_at) AS `year` FROM olist_db.olist_orders_dataset
 WHERE order_approved_at IS NOT NULL;
 
 -- FACT_SALES --
-INSERT INTO olist_db.f_sales (product_id, city_id, payment_id, review_id)
-(SELECT DISTINCT
-product_id
+INSERT INTO olist_db.f_sales (order_id, product_id, city_id, payment_id, review_id, hour_id, day_id, month_id, year_id, price)
+(SELECT 
+orders_dataset.order_id
+, product_id
 , city_id
 , payment_id
 , review_id
+, hour_id
+, day_id
+, month_id
+, year_id
+, order_items_dataset.price
 FROM 
 olist_db.olist_orders_dataset AS orders_dataset
-LEFT JOIN olist_db.olist_order_items_dataset AS order_items_dataset ON order_items_dataset.order_id = orders_dataset.order_id
+INNER JOIN olist_db.olist_order_items_dataset AS order_items_dataset ON order_items_dataset.order_id = orders_dataset.order_id
 INNER JOIN olist_db.temp_payment AS temp_payment ON temp_payment.order_id = orders_dataset.order_id
 INNER JOIN olist_db.olist_customers_dataset AS customers_dataset ON customers_dataset.customer_id = orders_dataset.customer_id
-LEFT JOIN olist_db.temp_city AS temp_city ON temp_city.customer_id = customers_dataset.customer_id
+INNER JOIN olist_db.temp_city AS temp_city ON temp_city.customer_id = customers_dataset.customer_id
 LEFT JOIN olist_db.temp_review AS temp_review ON temp_review.order_id = orders_dataset.order_id
+LEFT JOIN olist_db.temp_hour AS temp_hour ON temp_hour.order_id = orders_dataset.order_id
+LEFT JOIN olist_db.temp_day AS temp_day ON temp_day.order_id = orders_dataset.order_id
+LEFT JOIN olist_db.temp_month AS temp_month ON temp_month.order_id = orders_dataset.order_id
+LEFT JOIN olist_db.temp_year AS temp_year ON temp_year.order_id = orders_dataset.order_id
 WHERE order_approved_at IS NOT NULL);
