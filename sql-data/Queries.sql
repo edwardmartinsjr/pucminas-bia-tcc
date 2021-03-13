@@ -103,4 +103,30 @@ SELECT sum(price) from
 INNER JOIN olist_db.olist_order_items_dataset AS order_items_dataset ON order_items_dataset.order_id = orders_dataset.order_id
 INNER JOIN olist_db.olist_order_payments_dataset AS order_payments_dataset ON order_payments_dataset.order_id = orders_dataset.order_id
 WHERE order_approved_at IS NOT NULL
-group by orders_dataset.order_id) as orders
+group by orders_dataset.order_id) as order;
+
+select count(*) from olist_db.f_sales
+UNION
+select count(*) from olist_db.d_order
+UNION
+select count(*) from olist_db.d_review
+UNION
+select count(*) from olist_db.d_product
+UNION
+select count(*) from olist_db.d_product_category
+UNION
+select count(*) from olist_db.d_payment
+UNION
+select count(*) from olist_db.d_payment_type
+UNION
+select count(*) from olist_db.d_city
+UNION
+select count(*) from olist_db.d_state
+UNION
+select count(*) from olist_db.d_hour
+UNION
+select count(*) from olist_db.d_day
+UNION
+select count(*) from olist_db.d_month
+UNION
+select count(*) from olist_db.d_year; 
