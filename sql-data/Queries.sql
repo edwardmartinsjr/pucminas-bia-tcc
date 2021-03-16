@@ -146,13 +146,13 @@ select count(*) from olist_db.d_month
 UNION
 select count(*) from olist_db.d_year; 
 
-ALTER TABLE `olist_db`.`d_state` AUTO_INCREMENT=1;
-ALTER TABLE `olist_db`.`d_city` AUTO_INCREMENT=1;
-ALTER TABLE `olist_db`.`d_payment_type` AUTO_INCREMENT=1;
-ALTER TABLE `olist_db`.`d_payment` AUTO_INCREMENT=1;
-ALTER TABLE `olist_db`.`d_product_category` AUTO_INCREMENT=1;
-ALTER TABLE `olist_db`.`d_hour` AUTO_INCREMENT=1;
-ALTER TABLE `olist_db`.`d_day` AUTO_INCREMENT=1;
-ALTER TABLE `olist_db`.`d_month` AUTO_INCREMENT=1;
-ALTER TABLE `olist_db`.`d_year` AUTO_INCREMENT=1;
+-- ALTER TABLE `olist_db`.`d_state` AUTO_INCREMENT=1;
+-- ALTER TABLE `olist_db`.`d_city` AUTO_INCREMENT=1;
+-- ALTER TABLE `olist_db`.`d_payment_type` AUTO_INCREMENT=1;
+-- ALTER TABLE `olist_db`.`d_payment` AUTO_INCREMENT=1;
+-- ALTER TABLE `olist_db`.`d_product_category` AUTO_INCREMENT=1;
+-- ALTER TABLE `olist_db`.`d_hour` AUTO_INCREMENT=1;
+-- ALTER TABLE `olist_db`.`d_day` AUTO_INCREMENT=1;
+-- ALTER TABLE `olist_db`.`d_month` AUTO_INCREMENT=1;
+-- ALTER TABLE `olist_db`.`d_year` AUTO_INCREMENT=1;
 

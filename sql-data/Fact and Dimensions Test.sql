@@ -140,7 +140,7 @@ INSERT INTO olist_db.d_state (state)
 SELECT customers.state AS state FROM (SELECT DISTINCT(customer_state) AS state FROM olist_db.olist_customers_dataset) AS customers;
 
 INSERT INTO olist_db.d_city (city, state_id)
-(SELECT customers.customer_city AS city, state_id FROM (SELECT DISTINCT olist_customers_dataset.customer_id, customer_city, customer_state FROM olist_db.olist_customers_dataset AS olist_customers_dataset
+(SELECT customers.customer_city AS city, state_id FROM (SELECT DISTINCT customer_city, customer_state FROM olist_db.olist_customers_dataset AS olist_customers_dataset
 INNER JOIN olist_db.olist_orders_dataset AS olist_orders_datase ON olist_orders_datase.customer_id = olist_customers_dataset.customer_id) AS customers
 INNER JOIN olist_db.d_state AS state ON state.state = customers.customer_state);
 
@@ -184,11 +184,20 @@ WHERE order_approved_at IS NOT NULL;
 
 -- TEMPORARY TABLES --
 DROP TABLE IF EXISTS olist_db.temp_city;
-SET @rownr=0;
 CREATE TEMPORARY TABLE olist_db.temp_city
-SELECT @rownr:=@rownr+1 AS city_id, state_id, customers.customer_city AS city, customers.customer_id FROM (SELECT DISTINCT olist_customers_dataset.customer_id, customer_city, customer_state FROM olist_db.olist_customers_dataset AS olist_customers_dataset
-INNER JOIN olist_db.olist_orders_dataset AS olist_orders_datase ON olist_orders_datase.customer_id = olist_customers_dataset.customer_id) AS customers
-INNER JOIN olist_db.d_state AS location_state ON location_state.state = customers.customer_state;
+SELECT 
+location.city_id,
+location.state_id,
+location.city,
+location.state,
+customers_dataset.customer_id
+FROM
+(SELECT city_id, location_state.state_id, city, state FROM olist_db.d_city AS location_city
+INNER JOIN olist_db.d_state AS location_state ON location_city.state_id = location_state.state_id) AS location,
+(SELECT customers_dataset.customer_id, customer_city AS city, customer_state AS state FROM olist_db.olist_customers_dataset AS customers_dataset
+INNER JOIN olist_db.olist_orders_dataset AS orders_datase ON orders_datase.customer_id = customers_dataset.customer_id) AS customers_dataset
+WHERE customers_dataset.city = location.city
+AND customers_dataset.state = location.state;
 
 DROP TABLE IF EXISTS olist_db.temp_payment;
 SET @rownr=0;
