@@ -40,6 +40,23 @@ INNER JOIN olist_db.olist_customers_dataset as customers_dataset on customers_da
 WHERE product_category_name = 'consoles_games'
 AND customer_state = 'MG';
 
+SELECT distinct sales.product_id, city, state FROM olist_db.f_sales as sales
+INNER JOIN olist_db.d_product AS product ON product.product_id = sales.product_id
+INNER JOIN olist_db.d_product_category AS product_category ON product_category.category_id = product.category_id
+INNER JOIN olist_db.d_city AS city ON city.city_id = sales.city_id
+INNER JOIN olist_db.d_state AS state ON state.state_id = city.state_id
+WHERE 
+state = 'MG' AND 
+sales.product_id = '2bd9b51a9ab079e095aca987845d3266'
+UNION
+SELECT distinct products_dataset.product_id, customer_city, customer_state FROM olist_db.olist_orders_dataset as orders_dataset
+INNER JOIN olist_db.olist_order_items_dataset as order_items_dataset on order_items_dataset.order_id = orders_dataset.order_id
+INNER JOIN olist_db.olist_products_dataset as products_dataset on products_dataset.product_id = order_items_dataset.product_id
+INNER JOIN olist_db.olist_customers_dataset as customers_dataset on customers_dataset.customer_id = orders_dataset.customer_id
+WHERE 
+customer_state = 'MG' AND 
+products_dataset.product_id = '2bd9b51a9ab079e095aca987845d3266';
+
 SELECT count(distinct sales.product_id, city, state) FROM olist_db.f_sales as sales
 INNER JOIN olist_db.d_product AS product ON product.product_id = sales.product_id
 INNER JOIN olist_db.d_product_category AS product_category ON product_category.category_id = product.category_id
@@ -50,7 +67,6 @@ INNER JOIN olist_db.d_payment_type AS payment_type ON payment_type.type_id = pay
 WHERE category_name = 'consoles_games'
 AND state = 'MG'
 AND payment_type = 'boleto'
--- AND sales.product_id = '2bd9b51a9ab079e095aca987845d3266'
 UNION
 SELECT count(distinct products_dataset.product_id, customer_city, customer_state) FROM olist_db.olist_orders_dataset as orders_dataset
 INNER JOIN olist_db.olist_order_items_dataset as order_items_dataset on order_items_dataset.order_id = orders_dataset.order_id
@@ -60,7 +76,6 @@ INNER JOIN olist_db.olist_order_payments_dataset as order_payments_dataset on or
 WHERE product_category_name = 'consoles_games'
 AND customer_state = 'MG'
 AND payment_type = 'boleto';
--- AND products_dataset.product_id = '2bd9b51a9ab079e095aca987845d3266'
 
 SELECT count(distinct order_id) FROM olist_db.f_sales as sales
 UNION
@@ -130,4 +145,14 @@ UNION
 select count(*) from olist_db.d_month
 UNION
 select count(*) from olist_db.d_year; 
+
+ALTER TABLE `olist_db`.`d_state` AUTO_INCREMENT=1;
+ALTER TABLE `olist_db`.`d_city` AUTO_INCREMENT=1;
+ALTER TABLE `olist_db`.`d_payment_type` AUTO_INCREMENT=1;
+ALTER TABLE `olist_db`.`d_payment` AUTO_INCREMENT=1;
+ALTER TABLE `olist_db`.`d_product_category` AUTO_INCREMENT=1;
+ALTER TABLE `olist_db`.`d_hour` AUTO_INCREMENT=1;
+ALTER TABLE `olist_db`.`d_day` AUTO_INCREMENT=1;
+ALTER TABLE `olist_db`.`d_month` AUTO_INCREMENT=1;
+ALTER TABLE `olist_db`.`d_year` AUTO_INCREMENT=1;
 
