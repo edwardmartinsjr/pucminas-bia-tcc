@@ -120,31 +120,69 @@ INNER JOIN olist_db.olist_order_payments_dataset AS order_payments_dataset ON or
 WHERE order_approved_at IS NOT NULL
 group by orders_dataset.order_id) as orders;
 
-select count(*) from olist_db.f_sales
+SELECT sum(price) FROM (
+	SELECT max(price) as price FROM olist_db.f_sales as sales
+    INNER JOIN olist_db.d_city AS city ON city.city_id = sales.city_id
+	INNER JOIN olist_db.d_state AS state ON state.state_id = city.state_id
+    AND state = 'MG'
+    group by order_id
+) as sales
 UNION
-select count(*) from olist_db.d_order
+SELECT sum(price) from 
+(SELECT max(price) as price FROM olist_db.olist_orders_dataset AS orders_dataset
+INNER JOIN olist_db.olist_order_items_dataset AS order_items_dataset ON order_items_dataset.order_id = orders_dataset.order_id
+INNER JOIN olist_db.olist_order_payments_dataset AS order_payments_dataset ON order_payments_dataset.order_id = orders_dataset.order_id
+INNER JOIN olist_db.olist_customers_dataset as customers_dataset on customers_dataset.customer_id = orders_dataset.customer_id
+WHERE order_approved_at IS NOT NULL
+AND customer_state = 'MG'
+group by orders_dataset.order_id) as orders;
+
+SELECT sum(price) FROM olist_db.f_sales as sales
+INNER JOIN olist_db.d_product AS product ON product.product_id = sales.product_id
+INNER JOIN olist_db.d_product_category AS product_category ON product_category.category_id = product.category_id
+INNER JOIN olist_db.d_city AS city ON city.city_id = sales.city_id
+INNER JOIN olist_db.d_state AS state ON state.state_id = city.state_id
+WHERE 1=1
+AND category_name = 'consoles_games'
+AND state = 'MG'
 UNION
-select count(*) from olist_db.d_review
-UNION
-select count(*) from olist_db.d_product
-UNION
-select count(*) from olist_db.d_product_category
-UNION
-select count(*) from olist_db.d_payment
-UNION
-select count(*) from olist_db.d_payment_type
-UNION
-select count(*) from olist_db.d_city
-UNION
-select count(*) from olist_db.d_state
-UNION
-select count(*) from olist_db.d_hour
-UNION
-select count(*) from olist_db.d_day
-UNION
-select count(*) from olist_db.d_month
-UNION
-select count(*) from olist_db.d_year; 
+SELECT sum(price) FROM olist_db.olist_orders_dataset as orders_dataset
+INNER JOIN olist_db.olist_order_items_dataset as order_items_dataset on order_items_dataset.order_id = orders_dataset.order_id
+INNER JOIN olist_db.olist_products_dataset as products_dataset on products_dataset.product_id = order_items_dataset.product_id
+INNER JOIN olist_db.olist_customers_dataset as customers_dataset on customers_dataset.customer_id = orders_dataset.customer_id
+INNER JOIN olist_db.olist_order_payments_dataset AS order_payments_dataset ON order_payments_dataset.order_id = orders_dataset.order_id
+WHERE 1=1
+AND product_category_name = 'consoles_games'
+AND customer_state = 'MG';
+
+
+
+
+-- select count(*) from olist_db.f_sales
+-- UNION
+-- select count(*) from olist_db.d_order
+-- UNION
+-- select count(*) from olist_db.d_review
+-- UNION
+-- select count(*) from olist_db.d_product
+-- UNION
+-- select count(*) from olist_db.d_product_category
+-- UNION
+-- select count(*) from olist_db.d_payment
+-- UNION
+-- select count(*) from olist_db.d_payment_type
+-- UNION
+-- select count(*) from olist_db.d_city
+-- UNION
+-- select count(*) from olist_db.d_state
+-- UNION
+-- select count(*) from olist_db.d_hour
+-- UNION
+-- select count(*) from olist_db.d_day
+-- UNION
+-- select count(*) from olist_db.d_month
+-- UNION
+-- select count(*) from olist_db.d_year; 
 
 -- ALTER TABLE `olist_db`.`d_state` AUTO_INCREMENT=1;
 -- ALTER TABLE `olist_db`.`d_city` AUTO_INCREMENT=1;
@@ -156,3 +194,8 @@ select count(*) from olist_db.d_year;
 -- ALTER TABLE `olist_db`.`d_month` AUTO_INCREMENT=1;
 -- ALTER TABLE `olist_db`.`d_year` AUTO_INCREMENT=1;
 
+SELECT day, month, year, sum(price) FROM olist_db.f_sales as sales
+INNER JOIN olist_db.d_day as d_day on d_day.day_id = sales.day_id
+INNER JOIN olist_db.d_month as d_month on d_month.month_id = sales.month_id
+INNER JOIN olist_db.d_year as d_year on d_year.year_id = sales.year_id
+Group by day, month, year;
