@@ -1,3 +1,6 @@
+SET GLOBAL interactive_timeout=60;
+SET GLOBAL connect_timeout=60;
+
 -- DELETE -- 
 DROP TABLE IF EXISTS olist_db.f_sales;
 DROP TABLE IF EXISTS olist_db.d_order;

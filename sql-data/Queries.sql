@@ -156,46 +156,48 @@ AND product_category_name = 'consoles_games'
 AND customer_state = 'MG';
 
 
-
-
--- select count(*) from olist_db.f_sales
--- UNION
--- select count(*) from olist_db.d_order
--- UNION
--- select count(*) from olist_db.d_review
--- UNION
--- select count(*) from olist_db.d_product
--- UNION
--- select count(*) from olist_db.d_product_category
--- UNION
--- select count(*) from olist_db.d_payment
--- UNION
--- select count(*) from olist_db.d_payment_type
--- UNION
--- select count(*) from olist_db.d_city
--- UNION
--- select count(*) from olist_db.d_state
--- UNION
--- select count(*) from olist_db.d_hour
--- UNION
--- select count(*) from olist_db.d_day
--- UNION
--- select count(*) from olist_db.d_month
--- UNION
--- select count(*) from olist_db.d_year; 
-
--- ALTER TABLE `olist_db`.`d_state` AUTO_INCREMENT=1;
--- ALTER TABLE `olist_db`.`d_city` AUTO_INCREMENT=1;
--- ALTER TABLE `olist_db`.`d_payment_type` AUTO_INCREMENT=1;
--- ALTER TABLE `olist_db`.`d_payment` AUTO_INCREMENT=1;
--- ALTER TABLE `olist_db`.`d_product_category` AUTO_INCREMENT=1;
--- ALTER TABLE `olist_db`.`d_hour` AUTO_INCREMENT=1;
--- ALTER TABLE `olist_db`.`d_day` AUTO_INCREMENT=1;
--- ALTER TABLE `olist_db`.`d_month` AUTO_INCREMENT=1;
--- ALTER TABLE `olist_db`.`d_year` AUTO_INCREMENT=1;
-
-SELECT day, month, year, sum(price) FROM olist_db.f_sales as sales
-INNER JOIN olist_db.d_day as d_day on d_day.day_id = sales.day_id
-INNER JOIN olist_db.d_month as d_month on d_month.month_id = sales.month_id
-INNER JOIN olist_db.d_year as d_year on d_year.year_id = sales.year_id
-Group by day, month, year;
+SET GLOBAL interactive_timeout=60;
+SET GLOBAL connect_timeout=60;
+select count(*) from olist_db.olist_customers_dataset
+UNION
+select count(*) from olist_db.olist_geolocation_dataset
+UNION
+select count(*) from olist_db.olist_order_items_dataset
+UNION
+select count(*) from olist_db.olist_order_payments_dataset
+UNION
+select count(*) from olist_db.olist_order_reviews_dataset
+UNION
+select count(*) from olist_db.olist_orders_dataset
+UNION
+select count(*) from olist_db.olist_products_dataset
+UNION
+select count(*) from olist_db.olist_sellers_dataset
+UNION
+select count(*) from olist_db.product_category_name_translation
+UNION
+select count(*) from olist_db.f_sales
+UNION
+select count(*) from olist_db.d_order
+UNION
+select count(*) from olist_db.d_review
+UNION
+select count(*) from olist_db.d_product
+UNION
+select count(*) from olist_db.d_product_category
+UNION
+select count(*) from olist_db.d_payment
+UNION
+select count(*) from olist_db.d_payment_type
+UNION
+select count(*) from olist_db.d_city
+UNION
+select count(*) from olist_db.d_state
+UNION
+select count(*) from olist_db.d_hour
+UNION
+select count(*) from olist_db.d_day
+UNION
+select count(*) from olist_db.d_month
+UNION
+select count(*) from olist_db.d_year; 

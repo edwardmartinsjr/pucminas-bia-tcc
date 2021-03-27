@@ -138,6 +138,7 @@ def sales_fact(ds, **kwargs):
     WHERE customers_dataset.city = location.city
     AND customers_dataset.state = location.state;
     '''
+    print('temp_city')
     query_execute(query,'temp_city')
 
     query = '''
@@ -147,6 +148,7 @@ def sales_fact(ds, **kwargs):
     SELECT @rownr:=@rownr+1 AS payment_id, type_id, order_id, payment_sequential, payment_installments, payment_value FROM olist_db.olist_order_payments_dataset AS payments_dataset
     INNER JOIN olist_db.d_payment_type AS payment_type ON payment_type.payment_type = payments_dataset.payment_type;
     '''
+    print('temp_payment')
     query_execute(query,'temp_payment')
 
     query = '''
@@ -154,6 +156,7 @@ def sales_fact(ds, **kwargs):
     CREATE TABLE olist_db.temp_review
     SELECT review_id, order_id, review_score FROM olist_db.olist_order_reviews_dataset;
     '''
+    print('temp_review')
     query_execute(query,'temp_review')
 
     query = '''
@@ -163,6 +166,7 @@ def sales_fact(ds, **kwargs):
     SELECT @rownr:=@rownr+1 AS hour_id, order_id, HOUR(order_approved_at) AS `hour` FROM olist_db.olist_orders_dataset
     WHERE order_approved_at IS NOT NULL;
     '''
+    print('temp_hour')
     query_execute(query,'temp_hour')
 
     query = '''
@@ -172,6 +176,7 @@ def sales_fact(ds, **kwargs):
     SELECT @rownr:=@rownr+1 AS day_id, order_id, DAY(order_approved_at) AS `day` FROM olist_db.olist_orders_dataset
     WHERE order_approved_at IS NOT NULL;
     '''
+    print('temp_day')
     query_execute(query,'temp_day')
 
     query = '''
@@ -181,6 +186,7 @@ def sales_fact(ds, **kwargs):
     SELECT @rownr:=@rownr+1 AS month_id, order_id, MONTH(order_approved_at) AS `month` FROM olist_db.olist_orders_dataset
     WHERE order_approved_at IS NOT NULL;
     '''
+    print('temp_month')
     query_execute(query,'temp_month')
 
     query = '''
@@ -190,10 +196,14 @@ def sales_fact(ds, **kwargs):
     SELECT @rownr:=@rownr+1 AS year_id, order_id, YEAR(order_approved_at) AS `year` FROM olist_db.olist_orders_dataset
     WHERE order_approved_at IS NOT NULL;
     '''
+    print('temp_year')
     query_execute(query,'temp_year')                        
 
     # LOAD FACT SALES
     query = '''
+    SET GLOBAL interactive_timeout=120;
+    SET GLOBAL connect_timeout=120;
+
     INSERT INTO olist_db.f_sales (order_id, product_id, city_id, payment_id, review_id, hour_id, day_id, month_id, year_id, price)
     (SELECT 
     orders_dataset.order_id
