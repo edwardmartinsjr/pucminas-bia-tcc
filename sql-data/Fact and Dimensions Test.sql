@@ -222,10 +222,10 @@ orders_dataset.order_id
 , city_id
 , payment_id
 , review_id
-, 1 as hour_id
-, 1 as day_id
-, month_id
-, year_id
+, (SELECT hour_id FROM olist_db.d_hour WHERE hour = HOUR(order_approved_at)) AS hour_id
+, (SELECT day_id FROM olist_db.d_day WHERE day = DAY(order_approved_at)) AS day_id
+, (SELECT month_id FROM olist_db.d_month WHERE month = MONTH(order_approved_at)) AS month_id
+, (SELECT year_id FROM olist_db.d_year WHERE year = YEAR(order_approved_at)) AS year_id
 , order_items_dataset.price
 FROM 
 olist_db.olist_orders_dataset AS orders_dataset
@@ -234,8 +234,4 @@ INNER JOIN olist_db.temp_payment AS temp_payment ON temp_payment.order_id = orde
 INNER JOIN olist_db.olist_customers_dataset AS customers_dataset ON customers_dataset.customer_id = orders_dataset.customer_id
 INNER JOIN olist_db.temp_city AS temp_city ON temp_city.customer_id = customers_dataset.customer_id
 INNER JOIN olist_db.olist_order_reviews_dataset AS olist_order_reviews_dataset ON olist_order_reviews_dataset.order_id = orders_dataset.order_id
--- INNER JOIN olist_db.d_hour AS d_hour ON d_hour.hour = HOUR(order_approved_at)
--- INNER JOIN olist_db.d_day AS d_day ON d_day.day = DAY(order_approved_at)
-INNER JOIN olist_db.d_month AS d_month ON d_month.month = MONTH(order_approved_at)
-INNER JOIN olist_db.d_year AS d_year ON d_year.year = YEAR(order_approved_at)
 WHERE order_approved_at IS NOT NULL);
