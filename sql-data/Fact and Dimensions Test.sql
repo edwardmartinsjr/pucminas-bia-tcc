@@ -134,6 +134,15 @@ CREATE TABLE `olist_db`.`f_sales` (
   CONSTRAINT `year_id` FOREIGN KEY (`year_id`) REFERENCES `d_year` (`year_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+ALTER TABLE `olist_db`.`d_state` AUTO_INCREMENT=1;
+ALTER TABLE `olist_db`.`d_city` AUTO_INCREMENT=1;
+ALTER TABLE `olist_db`.`d_payment_type` AUTO_INCREMENT=1;
+ALTER TABLE `olist_db`.`d_payment` AUTO_INCREMENT=1;
+ALTER TABLE `olist_db`.`d_product_category` AUTO_INCREMENT=1;
+ALTER TABLE `olist_db`.`d_hour` AUTO_INCREMENT=1;
+ALTER TABLE `olist_db`.`d_day` AUTO_INCREMENT=1;
+ALTER TABLE `olist_db`.`d_month` AUTO_INCREMENT=1;
+ALTER TABLE `olist_db`.`d_year` AUTO_INCREMENT=1;
 
 -- INSERT --
 INSERT INTO olist_db.d_state (state) 
@@ -167,19 +176,19 @@ INSERT INTO olist_db.d_order (order_id, order_status)
 (SELECT order_id, order_status FROM olist_db.olist_orders_dataset);
 
 INSERT INTO olist_db.d_hour (`hour`)
-SELECT HOUR(order_approved_at) AS `hour` FROM olist_db.olist_orders_dataset
+SELECT DISTINCT HOUR(order_approved_at) AS `hour` FROM olist_db.olist_orders_dataset
 WHERE order_approved_at IS NOT NULL;
 
 INSERT INTO olist_db.d_day (`day`)
-SELECT DAY(order_approved_at) AS `day` FROM olist_db.olist_orders_dataset
+SELECT DISTINCT DAY(order_approved_at) AS `day` FROM olist_db.olist_orders_dataset
 WHERE order_approved_at IS NOT NULL;
 
 INSERT INTO olist_db.d_month (`month`)
-SELECT MONTH(order_approved_at) AS `month` FROM olist_db.olist_orders_dataset
+SELECT DISTINCT MONTH(order_approved_at) AS `month` FROM olist_db.olist_orders_dataset
 WHERE order_approved_at IS NOT NULL;
 
 INSERT INTO olist_db.d_year (`year`)
-SELECT YEAR(order_approved_at) AS `year` FROM olist_db.olist_orders_dataset
+SELECT DISTINCT YEAR(order_approved_at) AS `year` FROM olist_db.olist_orders_dataset
 WHERE order_approved_at IS NOT NULL;
 
 -- TEMPORARY TABLES --
@@ -205,34 +214,6 @@ CREATE TEMPORARY TABLE olist_db.temp_payment
 SELECT @rownr:=@rownr+1 AS payment_id, type_id, order_id, payment_sequential, payment_installments, payment_value FROM olist_db.olist_order_payments_dataset AS payments_dataset
 INNER JOIN olist_db.d_payment_type AS payment_type ON payment_type.payment_type = payments_dataset.payment_type;
 
-DROP TABLE IF EXISTS olist_db.temp_review;
-CREATE TEMPORARY TABLE olist_db.temp_review
-SELECT review_id, order_id, review_score FROM olist_db.olist_order_reviews_dataset;
-
-DROP TABLE IF EXISTS olist_db.temp_hour;
-SET @rownr=0;
-CREATE TEMPORARY TABLE olist_db.temp_hour
-SELECT @rownr:=@rownr+1 AS hour_id, order_id, HOUR(order_approved_at) AS `hour` FROM olist_db.olist_orders_dataset
-WHERE order_approved_at IS NOT NULL;
-
-DROP TABLE IF EXISTS olist_db.temp_day;
-SET @rownr=0;
-CREATE TEMPORARY TABLE olist_db.temp_day
-SELECT @rownr:=@rownr+1 AS day_id, order_id, DAY(order_approved_at) AS `day` FROM olist_db.olist_orders_dataset
-WHERE order_approved_at IS NOT NULL;
-
-DROP TABLE IF EXISTS olist_db.temp_month;
-SET @rownr=0;
-CREATE TEMPORARY TABLE olist_db.temp_month
-SELECT @rownr:=@rownr+1 AS month_id, order_id, MONTH(order_approved_at) AS `month` FROM olist_db.olist_orders_dataset
-WHERE order_approved_at IS NOT NULL;
-
-DROP TABLE IF EXISTS olist_db.temp_year;
-SET @rownr=0;
-CREATE TEMPORARY TABLE olist_db.temp_year
-SELECT @rownr:=@rownr+1 AS year_id, order_id, YEAR(order_approved_at) AS `year` FROM olist_db.olist_orders_dataset
-WHERE order_approved_at IS NOT NULL;
-
 -- FACT_SALES --
 INSERT INTO olist_db.f_sales (order_id, product_id, city_id, payment_id, review_id, hour_id, day_id, month_id, year_id, price)
 (SELECT 
@@ -241,8 +222,8 @@ orders_dataset.order_id
 , city_id
 , payment_id
 , review_id
-, hour_id
-, day_id
+, 1 as hour_id
+, 1 as day_id
 , month_id
 , year_id
 , order_items_dataset.price
@@ -252,9 +233,9 @@ INNER JOIN olist_db.olist_order_items_dataset AS order_items_dataset ON order_it
 INNER JOIN olist_db.temp_payment AS temp_payment ON temp_payment.order_id = orders_dataset.order_id
 INNER JOIN olist_db.olist_customers_dataset AS customers_dataset ON customers_dataset.customer_id = orders_dataset.customer_id
 INNER JOIN olist_db.temp_city AS temp_city ON temp_city.customer_id = customers_dataset.customer_id
-LEFT JOIN olist_db.temp_review AS temp_review ON temp_review.order_id = orders_dataset.order_id
-LEFT JOIN olist_db.temp_hour AS temp_hour ON temp_hour.order_id = orders_dataset.order_id
-LEFT JOIN olist_db.temp_day AS temp_day ON temp_day.order_id = orders_dataset.order_id
-LEFT JOIN olist_db.temp_month AS temp_month ON temp_month.order_id = orders_dataset.order_id
-LEFT JOIN olist_db.temp_year AS temp_year ON temp_year.order_id = orders_dataset.order_id
+INNER JOIN olist_db.olist_order_reviews_dataset AS olist_order_reviews_dataset ON olist_order_reviews_dataset.order_id = orders_dataset.order_id
+-- INNER JOIN olist_db.d_hour AS d_hour ON d_hour.hour = HOUR(order_approved_at)
+-- INNER JOIN olist_db.d_day AS d_day ON d_day.day = DAY(order_approved_at)
+INNER JOIN olist_db.d_month AS d_month ON d_month.month = MONTH(order_approved_at)
+INNER JOIN olist_db.d_year AS d_year ON d_year.year = YEAR(order_approved_at)
 WHERE order_approved_at IS NOT NULL);
