@@ -200,36 +200,34 @@ def sales_fact(ds, **kwargs):
     query_execute(query,'temp_year')                        
 
     # LOAD FACT SALES
-    query = '''
-    SET GLOBAL interactive_timeout=120;
-    SET GLOBAL connect_timeout=120;
-
-    INSERT INTO olist_db.f_sales (order_id, product_id, city_id, payment_id, review_id, hour_id, day_id, month_id, year_id, price)
-    (SELECT 
-    orders_dataset.order_id
-    , product_id
-    , city_id
-    , payment_id
-    , review_id
-    , hour_id
-    , day_id
-    , month_id
-    , year_id
-    , order_items_dataset.price
-    FROM 
-    olist_db.olist_orders_dataset AS orders_dataset
-    INNER JOIN olist_db.olist_order_items_dataset AS order_items_dataset ON order_items_dataset.order_id = orders_dataset.order_id
-    INNER JOIN olist_db.temp_payment AS temp_payment ON temp_payment.order_id = orders_dataset.order_id
-    INNER JOIN olist_db.olist_customers_dataset AS customers_dataset ON customers_dataset.customer_id = orders_dataset.customer_id
-    INNER JOIN olist_db.temp_city AS temp_city ON temp_city.customer_id = customers_dataset.customer_id
-    LEFT JOIN olist_db.temp_review AS temp_review ON temp_review.order_id = orders_dataset.order_id
-    LEFT JOIN olist_db.temp_hour AS temp_hour ON temp_hour.order_id = orders_dataset.order_id
-    LEFT JOIN olist_db.temp_day AS temp_day ON temp_day.order_id = orders_dataset.order_id
-    LEFT JOIN olist_db.temp_month AS temp_month ON temp_month.order_id = orders_dataset.order_id
-    LEFT JOIN olist_db.temp_year AS temp_year ON temp_year.order_id = orders_dataset.order_id
-    WHERE order_approved_at IS NOT NULL);
-    '''
-    query_execute(query,'f_sales')
+    f_sales = pd.DataFrame()
+    with storage.engine_connect().begin() as connection:
+        f_sales = pd.read_sql("""
+            SELECT 
+            orders_dataset.order_id
+            , product_id
+            , city_id
+            , payment_id
+            , review_id
+            , hour_id
+            , day_id
+            , month_id
+            , year_id
+            , order_items_dataset.price
+            FROM 
+            olist_db.olist_orders_dataset AS orders_dataset
+            INNER JOIN olist_db.olist_order_items_dataset AS order_items_dataset ON order_items_dataset.order_id = orders_dataset.order_id
+            INNER JOIN olist_db.temp_payment AS temp_payment ON temp_payment.order_id = orders_dataset.order_id
+            INNER JOIN olist_db.olist_customers_dataset AS customers_dataset ON customers_dataset.customer_id = orders_dataset.customer_id
+            INNER JOIN olist_db.temp_city AS temp_city ON temp_city.customer_id = customers_dataset.customer_id
+            LEFT JOIN olist_db.temp_review AS temp_review ON temp_review.order_id = orders_dataset.order_id
+            LEFT JOIN olist_db.temp_hour AS temp_hour ON temp_hour.order_id = orders_dataset.order_id
+            LEFT JOIN olist_db.temp_day AS temp_day ON temp_day.order_id = orders_dataset.order_id
+            LEFT JOIN olist_db.temp_month AS temp_month ON temp_month.order_id = orders_dataset.order_id
+            LEFT JOIN olist_db.temp_year AS temp_year ON temp_year.order_id = orders_dataset.order_id
+            WHERE order_approved_at IS NOT NULL;
+        """, connection)
+    storage.load_data_into_db(f_sales, 'olist_db', 'f_sales') 
     
     # DROP TEMP TABLES
     query = '''
@@ -246,10 +244,10 @@ def sales_fact(ds, **kwargs):
 # Execute query        
 def query_execute(query, table_name):
     try:
-        connection = storage.engine_connect()
-        connection.execute(query)
-        result = connection.execute('SELECT COUNT(*) FROM olist_db.{db_table_name};'.format(db_table_name = table_name))
-        print('Row count: ' + str([{value for value in row} for row in result if result is not None][0]))
+        with storage.engine_connect().begin() as connection:
+            connection.execute(query)
+            result = connection.execute('SELECT COUNT(*) FROM olist_db.{db_table_name};'.format(db_table_name = table_name))
+            print('Row count: ' + str([{value for value in row} for row in result if result is not None][0]))
     except BaseException as e:
         raise ValueError(e) 
 

@@ -18,7 +18,7 @@ def get_conn():
     
 # Set MySQL engine connection
 def engine_connect():
-    return create_engine(get_conn(), pool_size=10, max_overflow=20)
+    return create_engine(get_conn(), pool_size=10, max_overflow=200)
 
 # Create database session (SQLAlchemy Object Relational Mapper - ORM )
 Session = sessionmaker()
